@@ -10,7 +10,7 @@ WIN = pygame.display.set_mode((WIDTH, WIDTH))
 LOGO = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'logo.png')).convert_alpha(), (35, 35))
 pygame.display.set_caption("Pathfinding Visualizer")
 pygame.display.set_icon(LOGO)
-
+sss
 
 def draw(win, grid, rows, width) -> None:
     win.fill(WHITE)
