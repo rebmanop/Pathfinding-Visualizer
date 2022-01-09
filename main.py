@@ -1,7 +1,10 @@
 import pygame
 import os
 from grid import draw_grid, make_grid
-from algo import astar, dijkstra
+from algo import astar, dijkstra, dfs
+
+
+
 
 WHITE = (255, 255, 255)
 ROWS = 50
@@ -87,12 +90,20 @@ def main(win, width, rows):
                         for cell in row:
                             cell.update_neighbors(grid)
 
-                    dijkstra(lambda: draw(win, grid, ROWS, WIDTH), grid, start, end)
+                    astar(lambda: draw(win, grid, ROWS, WIDTH), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
                     end = None
                     grid = make_grid(rows, width)
+
+
+                #if event.key == pygame.K_a and start and end:
+                #    for row in grid:
+                #        for cell in row:
+                #            cell.update_neighbors(grid)
+
+                #    gen_maze(lambda: draw(win, grid, ROWS, WIDTH), grid, start, end)
 
 
     pygame.quit()

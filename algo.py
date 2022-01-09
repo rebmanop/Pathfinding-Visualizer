@@ -1,5 +1,7 @@
 import pygame
 from queue import PriorityQueue
+import random
+
 
 def heuristic(p1, p2) -> int:
     x1, y1 = p1
@@ -125,7 +127,63 @@ def dijkstra(draw, grid, start, end):
         if current != start:
             current.make_closed()
 
-   
 
 
+def dfs(draw, grid, start, end):
+    marked = {spot: False for row in grid for spot in row}
+    stack = [start]
+    while len(stack) > 0:
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+
+        if current == end:
+            return
+
+        current = stack.pop()
+        if not marked[current]:
+            marked[current] = True
+            for neighbor in current.neighbors:
+                if not marked[neighbor]:
+                    stack.append(neighbor)
+
+        
+        draw()
+
+        if current != start:
+                current.make_closed()
+
+
+"""
+def generate_maze_dfs(draw, grid, start, end):
+    marked = {spot: False for row in grid for spot in row}
+    stack = [start]
+    visited_nodes_set = set()
+    while len(stack) > 0:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+
+        
+        current = stack.pop()
+        random.shuffle(current.neighbors)
+        random_index = random.randint(0, len(current.neighbors) - 1)
+        if current 
+                if not marked[neighbor]:
+
+
+        
+        
+        draw()
+
+"""
