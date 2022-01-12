@@ -1,9 +1,7 @@
 import pygame
 import os
 from grid import draw_grid, make_grid
-from algo import astar, dijkstra, dfs
-
-
+from algo import astar, dijkstra, dfs, generate_maze_dfs
 
 
 WHITE = (255, 255, 255)
@@ -26,7 +24,7 @@ def draw(win, grid, rows, width) -> None:
     pygame.display.update()
 
 
-def get_pos_of_clicked_cell(pos, rows, width) -> tuple:
+def get_row_col_of_clicked_cell(pos, rows, width) -> tuple:
     gap = width // rows
     y, x = pos
 
@@ -54,7 +52,7 @@ def main(win, width, rows):
      
             if pygame.mouse.get_pressed()[0]: #left mouse button
                 pos = pygame.mouse.get_pos()
-                row, col = get_pos_of_clicked_cell(pos, rows, width)
+                row, col = get_row_col_of_clicked_cell(pos, rows, width)
                 clicked_cell = grid[row][col]
 
                 if not start and  clicked_cell != end:
@@ -70,7 +68,7 @@ def main(win, width, rows):
 
             elif pygame.mouse.get_pressed()[2]: #right mouse button
                 pos = pygame.mouse.get_pos()
-                row, col = get_pos_of_clicked_cell(pos, rows, width)
+                row, col = get_row_col_of_clicked_cell(pos, rows, width)
                 clicked_cell = grid[row][col]
                 
                 if  clicked_cell.is_start():
@@ -98,16 +96,26 @@ def main(win, width, rows):
                     grid = make_grid(rows, width)
 
 
-                #if event.key == pygame.K_a and start and end:
-                #    for row in grid:
-                #        for cell in row:
-                #            cell.update_neighbors(grid)
+                if event.key == pygame.K_m:
+                    start = grid[0][0]
+                    end = None
+                    
+                    for row in grid:
+                        for cell in row:
+                            cell.make_barrier()
 
-                #    gen_maze(lambda: draw(win, grid, ROWS, WIDTH), grid, start, end)
+                    for row in grid:
+                        for cell in row:
+                            cell.update_maze_gen_neighbors(grid)
 
+                    generate_maze_dfs(lambda: draw(win, grid, ROWS, WIDTH), start)
+
+                    start.make_start()
+
+                   
+ 
 
     pygame.quit()
-
 
 
 if __name__ == '__main__':

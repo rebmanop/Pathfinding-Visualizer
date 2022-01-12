@@ -30,8 +30,10 @@ class Cell:
 		self.y = col * width
 		self.color = WHITE
 		self.neighbors = []
+		self.maze_gen_neighbors = []
 		self.width = width
 		self.total_rows = total_rows
+
 
 	def get_pos(self):
 		return self.row, self.col
@@ -50,6 +52,7 @@ class Cell:
 
 	def is_end(self):
 		return self.color == TURQUOISE
+
 
 	def reset(self):
 		self.color = WHITE
@@ -72,8 +75,10 @@ class Cell:
 	def make_path(self):
 		self.color = PURPLE
 
+
 	def draw(self, win):
 		pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+
 
 	def update_neighbors(self, grid):
 		self.neighbors = []
@@ -88,4 +93,21 @@ class Cell:
 
 		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
 			self.neighbors.append(grid[self.row][self.col - 1])
+
+	
+	def update_maze_gen_neighbors(self, grid):
+		self.maze_gen_neighbors = []
+		if self.row < self.total_rows - 1: # DOWN
+			self.maze_gen_neighbors.append(grid[self.row + 1][self.col]) 
+
+		if self.row > 0 : # UP
+			self.maze_gen_neighbors.append(grid[self.row - 1][self.col])
+
+		if self.col < self.total_rows - 1: # RIGHT
+			self.maze_gen_neighbors.append(grid[self.row][self.col + 1])
+
+		if self.col > 0: # LEFT
+			self.maze_gen_neighbors.append(grid[self.row][self.col - 1])
+
+	
 

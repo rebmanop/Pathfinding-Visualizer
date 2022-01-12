@@ -3,13 +3,7 @@ from queue import PriorityQueue
 import random
 
 
-def heuristic(p1, p2) -> int:
-    x1, y1 = p1
-    x2, y2 = p2
-    return abs(x1 - x2) + abs(y1 - y2)
-
-
-def reconstruct_path(came_from, current, draw) -> None: 
+def reconstruct_path(came_from, current) -> None: 
     path = []
     while current in came_from:
         current = came_from[current]
@@ -21,13 +15,36 @@ def reconstruct_path(came_from, current, draw) -> None:
 
 
 def animate_path(draw, path):
-    
     for cell in path:
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+        
         cell.make_path()
         draw()
         pygame.time.wait(10)
 
-    
+
+def get_unvisited_neighbors(visited_set, cell):
+    unvisited = []
+    for neighbor in cell.maze_gen_neighbors:
+        if neighbor not in visited_set:
+            unvisited.append(neighbor)
+
+    return unvisited
+
+
+def heuristic(p1, p2) -> int:
+    x1, y1 = p1
+    x2, y2 = p2
+    return abs(x1 - x2) + abs(y1 - y2)
+
+
 def astar(draw, grid, start, end) -> None:
     count = 0
     open_set = PriorityQueue()
@@ -55,7 +72,7 @@ def astar(draw, grid, start, end) -> None:
         open_set_hash.remove(current)
         
         if current == end:
-            path = reconstruct_path(came_from, current, draw)
+            path = reconstruct_path(came_from, current)
             animate_path(draw, path)
             return
 
@@ -80,7 +97,6 @@ def astar(draw, grid, start, end) -> None:
             current.make_closed()
 
    
-
 def dijkstra(draw, grid, start, end):
     count = 0
     open_set = PriorityQueue()
@@ -105,7 +121,7 @@ def dijkstra(draw, grid, start, end):
         
         
         if current == end:
-            path = reconstruct_path(came_from, current, draw)
+            path = reconstruct_path(came_from, current)
             animate_path(draw, path)
             return
         
@@ -126,7 +142,6 @@ def dijkstra(draw, grid, start, end):
 
         if current != start:
             current.make_closed()
-
 
 
 def dfs(draw, grid, start, end):
@@ -159,11 +174,10 @@ def dfs(draw, grid, start, end):
                 current.make_closed()
 
 
-"""
-def generate_maze_dfs(draw, grid, start, end):
-    marked = {spot: False for row in grid for spot in row}
+def generate_maze_dfs(draw, start):    
+    visited_set = {start}
     stack = [start]
-    visited_nodes_set = set()
+
     while len(stack) > 0:
 
         for event in pygame.event.get():
@@ -174,16 +188,26 @@ def generate_maze_dfs(draw, grid, start, end):
                 if event.key == pygame.K_ESCAPE:
                     return
 
-        
+
         current = stack.pop()
-        random.shuffle(current.neighbors)
-        random_index = random.randint(0, len(current.neighbors) - 1)
-        if current 
-                if not marked[neighbor]:
+        neighbors = get_unvisited_neighbors(visited_set, current)
 
 
-        
-        
+        if len(neighbors) > 0:
+            random_index = random.randint(0, len(neighbors) - 1)
+            for neighbor in neighbors:
+                visited_set.add(neighbor)
+                
+                if neighbor != neighbors[random_index]:
+                    stack.append(neighbor)
+                    
+            
+            stack.append(neighbors[random_index])
+            current.reset()
+           
         draw()
+        
 
-"""
+
+        
+        
