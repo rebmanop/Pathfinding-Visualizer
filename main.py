@@ -1,10 +1,10 @@
-import pygame
 import os
-from grid import draw_grid, make_grid
-from algo import astar, dijkstra, dfs, generate_maze_dfs
+import algo
+import pygame
+from grid import Grid
+from pygame import Color
 
 
-WHITE = (255, 255, 255)
 ROWS = 50
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH)) 
@@ -13,29 +13,15 @@ pygame.display.set_caption("Pathfinding Visualizer")
 pygame.display.set_icon(LOGO)
 
 
-def draw(win, grid, rows, width) -> None:
-    win.fill(WHITE)
-
-    for row in grid:
-        for cell in row:
-            cell.draw(win)
-
-    draw_grid(win, rows, width)
+def draw(win, grid) -> None:
+    win.fill(Color('white'))
+    grid.fill_cells_with_color()
+    grid.draw_grid_lines()
     pygame.display.update()
 
 
-def get_row_col_of_clicked_cell(pos, rows, width) -> tuple:
-    gap = width // rows
-    y, x = pos
-
-    row = y // gap
-    col = x // gap
-
-    return row, col
-
-
 def main(win, width, rows):
-    grid = make_grid(rows, width)
+    grid = Grid(win, rows, width)
 
     start = None
     end = None
@@ -43,38 +29,39 @@ def main(win, width, rows):
     running = True
 
     while running:
-        draw(win, grid, ROWS, WIDTH)
+        draw(win, grid)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
      
-            if pygame.mouse.get_pressed()[0]: #left mouse button
-                pos = pygame.mouse.get_pos()
-                row, col = get_row_col_of_clicked_cell(pos, rows, width)
-                clicked_cell = grid[row][col]
-
-                if not start and  clicked_cell != end:
+            if pygame.mouse.get_pressed()[0]: #left mouse button clicked
+                mpos = pygame.mouse.get_pos()
+                row, col = grid.get_row_col_of_clicked_cell(mpos)
+                clicked_cell = grid.get_cell(row, col)
+                
+                if not start  and  clicked_cell != end:
                     start =  clicked_cell
                     start.make_start()
 
-                elif not end and  clicked_cell != start:
+                elif not end  and  clicked_cell != start:
                     end =  clicked_cell
-                    end.make_end()
+                    end.make_end()    
 
-                elif  clicked_cell != end and  clicked_cell != start:
-                     clicked_cell.make_barrier()
+                elif clicked_cell != end  and  clicked_cell != start:
+                    clicked_cell.make_barrier()
+               
 
-            elif pygame.mouse.get_pressed()[2]: #right mouse button
-                pos = pygame.mouse.get_pos()
-                row, col = get_row_col_of_clicked_cell(pos, rows, width)
-                clicked_cell = grid[row][col]
+            elif pygame.mouse.get_pressed()[2]: #right mouse button clicked
+                mpos = pygame.mouse.get_pos()
+                row, col = grid.get_row_col_of_clicked_cell(mpos)
+                clicked_cell = grid.get_cell(row, col)
                 
                 if  clicked_cell.is_start():
                     start = None
                     clicked_cell.reset()
-              
+          
                 elif  clicked_cell.is_end():
                     end = None
                     clicked_cell.reset()
@@ -82,34 +69,24 @@ def main(win, width, rows):
                 elif clicked_cell.is_barrier():
                     clicked_cell.reset()
                 
+                
             if event.type == pygame.KEYDOWN:
+                
                 if event.key == pygame.K_SPACE and start and end:
-                    for row in grid:
-                        for cell in row:
-                            cell.update_neighbors(grid)
+                    grid.update_available_neighbors_for_every_cell()
+                    algo.astar(lambda: draw(win, grid), grid, start, end)
 
-                    astar(lambda: draw(win, grid, ROWS, WIDTH), grid, start, end)
-
-                if event.key == pygame.K_c:
+                if event.key == pygame.K_c: #clear the table
                     start = None
                     end = None
-                    grid = make_grid(rows, width)
+                    grid = Grid(win, rows, width)
 
 
                 if event.key == pygame.K_m:
-                    start = grid[0][0]
+                    start = grid.get_cell(row=0, col=0)
                     end = None
-                    
-                    for row in grid:
-                        for cell in row:
-                            cell.make_barrier()
-
-                    for row in grid:
-                        for cell in row:
-                            cell.update_maze_gen_neighbors(grid)
-
-                    generate_maze_dfs(lambda: draw(win, grid, ROWS, WIDTH), start)
-
+                    grid.update_all_neighbors_for_every_cell()
+                    algo.generate_maze_dfs(lambda: draw(win, grid), start)
                     start.make_start()
 
                    
