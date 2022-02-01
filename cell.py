@@ -1,14 +1,5 @@
 import pygame
 
-#WHITE = (255, 255, 255)
-#RED = (255, 0, 0)
-#GREEN2 = (66, 192, 168)
-#GREEN = (0, 255, 0)
-#BLACK = (0, 0, 0)
-#BLUE = (69, 199, 224)
-#YELLOW = (255, 254, 95)
-#PURPLE = (190, 108, 255)
-
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -42,7 +33,7 @@ class Cell:
 	def is_closed(self):
 		return self.color == RED
 
-	def is_open(self):
+	def is_open(self):	
 		return self.color == GREEN
 
 	def is_barrier(self):
@@ -84,34 +75,22 @@ class Cell:
 		pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
 
 
-	def update_available_neighbors(self, grid):
+	def update_neighbors(self, grid):
 		self.neighbors = []
-		if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
+		if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): #down
 			self.neighbors.append(grid[self.row + 1][self.col])
 
-		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
+		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): #up
 			self.neighbors.append(grid[self.row - 1][self.col])
 
-		if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
+		if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): #right
 			self.neighbors.append(grid[self.row][self.col + 1])
 
-		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
+		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): #left
 			self.neighbors.append(grid[self.row][self.col - 1])
 
 	
-	def update_all_neighbors(self, grid):
-		self.maze_gen_neighbors = []
-		if self.row < self.total_rows - 1: # DOWN
-			self.maze_gen_neighbors.append(grid[self.row + 1][self.col]) 
-
-		if self.row > 0 : # UP
-			self.maze_gen_neighbors.append(grid[self.row - 1][self.col])
-
-		if self.col < self.total_rows - 1: # RIGHT
-			self.maze_gen_neighbors.append(grid[self.row][self.col + 1])
-
-		if self.col > 0: # LEFT
-			self.maze_gen_neighbors.append(grid[self.row][self.col - 1])
+	
 
 	
 
