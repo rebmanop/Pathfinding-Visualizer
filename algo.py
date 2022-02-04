@@ -242,24 +242,31 @@ def bfs(draw, grid, start, end):
 
 def recursive_division_maze_gen(draw, start, grid, animation):
     _ = start
-    
-    top = 0
-    buttom = grid.total_rows - 1
-    left = 0
-    right = grid.total_rows - 1 
-
+    top = 1
+    buttom = grid.total_rows - 2
+    left = 1
+    right = grid.total_rows - 2 
+    draw_outside_border(draw, grid)
     recursive_division(draw, grid, buttom, top, left, right, animation)
 
 
 def recursive_division(draw, grid, buttom, top, left, right, animation):
 
-    if (buttom - top) < 2 or (right - left) < 2:
-        return
-
     horizontal = random.choice([True, False])
 
+    available_idxes = get_available_indxs(grid, buttom, top, left, right, horizontal)
+    
 
-    wall_idx = random.randint(top + 1, buttom - 1) if horizontal else random.randint(left + 1, right - 1)
+    if len(available_idxes) == 0:
+        horizontal = not horizontal
+        available_idxes = get_available_indxs(grid, buttom, top, left, right, horizontal)
+
+        if len(available_idxes) == 0:
+            return
+
+
+    wall_idx = random.choice(available_idxes)
+
     build_wall(draw, grid, horizontal, wall_idx, buttom, top, left, right, animation)
     carve_path(draw, grid, horizontal, wall_idx, buttom, top, left, right, animation)
     
@@ -270,61 +277,59 @@ def recursive_division(draw, grid, buttom, top, left, right, animation):
     else:
         recursive_division(draw, grid, buttom, top, wall_idx + 1, right,  animation)
         recursive_division(draw, grid, buttom, top, left, wall_idx - 1,  animation)
+
+
+def get_available_indxs(grid, buttom, top, left, right, horizontal):
+    """returns list of valid wall indexes, so future wall wouldn't block exit out of the room 
+        and wouldn't spawn rigth next to existing wall"""
+    
+    available_idxes = []
+    if horizontal:
+        for i in range(top + 1, buttom):
+            if not grid[i][left - 1].is_reset() and not grid[i][right + 1].is_reset():
+                available_idxes.append(i)
+ 
+    else:
+        for i in range(left + 1, right):
+            if not grid[top - 1][i].is_reset() and not grid[buttom + 1][i].is_reset():
+                available_idxes.append(i)
+
+    return available_idxes
     
  
 def build_wall(draw, grid, horizontal: bool, index,  buttom, top, left, right, animation: bool):
     if horizontal:
         for j in range(left, right + 1):
             grid[index][j].make_barrier()
+            if aborted():
+                return
             if animation:
                 draw()
     
     else:
         for i in range(top, buttom + 1):
             grid[i][index].make_barrier()
+            if aborted():
+                return
             if animation:
                 draw()
             
 
 def carve_path(draw, grid, horizontal: bool, index,  buttom, top, left, right, animation: bool):
-    if horizontal :
-        if ((left - 1 >= 0) and grid[index][left - 1].is_reset()) and ((right + 1) <= (grid.total_rows - 1) and grid[index][right + 1].is_reset()):
-            grid[index][left].reset()
-            grid[index][right].reset()
-        
-        elif (left - 1 >= 0) and grid[index][left - 1].is_reset():
-            grid[index][left].reset()
-
-        elif (right + 1) <= (grid.total_rows - 1) and grid[index][right + 1].is_reset():
-            grid[index][right].reset()
-
-        else:
-            rand_idx = random.randint(left, right)
-            grid[index][rand_idx].reset()
-            
+    if horizontal :    
+        rand_idx = random.randint(left, right)
+        grid[index][rand_idx].reset()
         if animation:
             draw()
 
     else:
-        if ((buttom + 1) <= (grid.total_rows - 1) and grid[buttom + 1][index].is_reset()) and ((top - 1) >= 0 and grid[top - 1][index].is_reset()):
-            grid[buttom][index].reset()
-            grid[top][index].reset()
-
-        elif (top - 1) >= 0 and grid[top - 1][index].is_reset():
-            grid[top][index].reset()
-
-        elif (buttom + 1) <= (grid.total_rows - 1) and grid[buttom + 1][index].is_reset():
-            grid[buttom][index].reset()
-
-        else:
-            rand_idx = random.randint(top, buttom)
-            grid[rand_idx][index].reset()
-        
+        rand_idx = random.randint(top, buttom)
+        grid[rand_idx][index].reset()
         if animation:
             draw()
  
 
-def draw_border(draw, grid):
+def draw_outside_border(draw, grid):
     for i, row in enumerate(grid.raw_grid):
         for j, cell in enumerate(row):
             if aborted():

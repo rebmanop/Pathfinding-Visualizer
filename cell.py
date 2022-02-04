@@ -1,3 +1,4 @@
+from pickle import PUT
 import pygame
 
 
@@ -68,6 +69,9 @@ class Cell:
 		self.color = TURQUOISE
 
 	def make_path(self):
+		self.color = PURPLE
+
+	def make_test(self):
 		self.color = PURPLE
 
 

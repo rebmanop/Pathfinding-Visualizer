@@ -80,7 +80,7 @@ def main(win, width, rows) -> None:
                     grid = Grid(win, rows, width)
 
                 if event.key == pygame.K_m:
-                    start = grid[0][0]
+                    start = grid[1][1]
                     end = None
                     grid.update_neighbors_for_every_cell()
                     algo.recursive_division_maze_gen(lambda: draw(win, grid), start, grid, animation = True)
