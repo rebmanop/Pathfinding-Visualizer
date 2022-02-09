@@ -1,4 +1,3 @@
-from pickle import PUT
 import pygame
 
 
@@ -18,13 +17,12 @@ class Cell:
 	def __init__(self, row, col, width, total_rows):
 		self.row = row
 		self.col = col
-		self.x = row * width
-		self.y = col * width
-		self.color = WHITE
-		self.neighbors = []
-		self.maze_gen_neighbors = []
 		self.width = width
 		self.total_rows = total_rows
+		self.color = WHITE
+		self.neighbors = []
+		self.x = self.col * self.width
+		self.y = self.row * self.width
 
 
 	def get_pos(self):
@@ -71,9 +69,6 @@ class Cell:
 	def make_path(self):
 		self.color = PURPLE
 
-	def make_test(self):
-		self.color = PURPLE
-
 
 	def draw(self, win):
 		pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
@@ -92,9 +87,8 @@ class Cell:
 
 		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): #left
 			self.neighbors.append(grid[self.row][self.col - 1])
+	
 
-	
-	
 
 	
 

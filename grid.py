@@ -1,36 +1,38 @@
 import pygame
 from cell import Cell
 
+
 GREY = (130, 127, 125)
 
 class Grid:
+
     def __init__(self, win, rows, width):
         self.win = win 
         self.total_rows = rows
         self.width = width
         self.height = width
         self.gap = self.width // self.total_rows
-        self.raw_grid = self.init_cells()
         self.line_color = GREY
+        self.raw_grid  = self.init_cells()
 
 
-    def init_cells(self) -> list:
+
+    def init_cells(self):
         raw_grid = []
 
         for i in range(self.total_rows):
             raw_grid.append([])
             for j in range(self.total_rows):
-                cell = Cell(i, j, self.gap, self.total_rows)
-                raw_grid[i].append(cell)
+                raw_grid[i].append(Cell(i, j, self.gap, self.total_rows))
 
         return raw_grid
-
+        
 
     def draw_grid_lines(self) -> None:
         for i in range(self.total_rows):
             pygame.draw.line(self.win, self.line_color, (0, i * self.gap), (self.width, i * self.gap))
             for j in range(self.total_rows):
-                pygame.draw.line(self.win, self.line_color, (j * self.gap, 0), (j * self.gap, self.height))
+                pygame.draw.line(self.win, self.line_color, (j * self.gap, 0), (j * self.gap, self.width))
 
 
     def update_neighbors_for_every_cell(self) -> None:
@@ -50,12 +52,12 @@ class Grid:
     
 
     def get_row_col_of_clicked_cell(self, mpos) -> tuple:
-        y, x = mpos
+        x, y = mpos
 
         row = y // self.gap
         col = x // self.gap
 
-        return row, col
+        return row, col 
     
     
     def make_all_cells_barrier(self) -> None:

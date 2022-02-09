@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from this import d
 import pygame
@@ -79,7 +80,7 @@ def astar(draw, grid, start, end, animation: bool) -> None:
         
         if current == end:
             path: list = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid)
+            animate_path(draw, path, grid, animation)
             return
 
         for neighbor in current.neighbors:
@@ -178,7 +179,7 @@ def dfs(draw, grid, start, end) -> None:
                 current.make_closed()
 
 
-def random_dfs_maze_gen(draw, start, grid) -> None:    
+def random_dfs_maze_gen(draw, start, grid, animation) -> None:    
     grid.make_all_cells_barrier()
     visited_set = {start}
     stack = [start]
@@ -204,8 +205,9 @@ def random_dfs_maze_gen(draw, start, grid) -> None:
             stack.append(neighbors[random_index])
             if not current.is_reset():
                 current.reset()
-           
-        draw()
+
+        if animation:
+            draw()
         
 
 def bfs(draw, grid, start, end):
@@ -243,23 +245,23 @@ def bfs(draw, grid, start, end):
 def recursive_division_maze_gen(draw, start, grid, animation):
     _ = start
     top = 1
-    buttom = grid.total_rows - 2
+    bottom = grid.total_rows - 2
     left = 1
     right = grid.total_rows - 2 
-    draw_outside_border(draw, grid)
-    recursive_division(draw, grid, buttom, top, left, right, animation)
+    draw_outside_border(draw, grid, animation)
+    recursive_division(draw, grid, bottom, top, left, right, animation)
 
 
-def recursive_division(draw, grid, buttom, top, left, right, animation):
+def recursive_division(draw, grid, bottom, top, left, right, animation):
 
     horizontal = random.choice([True, False])
 
-    available_idxes = get_available_indxs(grid, buttom, top, left, right, horizontal)
+    available_idxes = get_available_indxs(grid, bottom, top, left, right, horizontal)
     
 
     if len(available_idxes) == 0:
         horizontal = not horizontal
-        available_idxes = get_available_indxs(grid, buttom, top, left, right, horizontal)
+        available_idxes = get_available_indxs(grid, bottom, top, left, right, horizontal)
 
         if len(available_idxes) == 0:
             return
@@ -267,37 +269,37 @@ def recursive_division(draw, grid, buttom, top, left, right, animation):
 
     wall_idx = random.choice(available_idxes)
 
-    build_wall(draw, grid, horizontal, wall_idx, buttom, top, left, right, animation)
-    carve_path(draw, grid, horizontal, wall_idx, buttom, top, left, right, animation)
+    build_wall(draw, grid, horizontal, wall_idx, bottom, top, left, right, animation)
+    carve_path(draw, grid, horizontal, wall_idx, bottom, top, left, right, animation)
     
     if horizontal:
-        recursive_division(draw, grid, buttom, wall_idx + 1, left, right, animation)
+        recursive_division(draw, grid, bottom, wall_idx + 1, left, right, animation)
         recursive_division(draw, grid, wall_idx - 1, top, left, right,  animation)
 
     else:
-        recursive_division(draw, grid, buttom, top, wall_idx + 1, right,  animation)
-        recursive_division(draw, grid, buttom, top, left, wall_idx - 1,  animation)
+        recursive_division(draw, grid, bottom, top, wall_idx + 1, right,  animation)
+        recursive_division(draw, grid, bottom, top, left, wall_idx - 1,  animation)
 
 
-def get_available_indxs(grid, buttom, top, left, right, horizontal):
+def get_available_indxs(grid, bottom, top, left, right, horizontal):
     """returns list of valid wall indexes, so future wall wouldn't block exit out of the room 
         and wouldn't spawn rigth next to existing wall"""
     
     available_idxes = []
     if horizontal:
-        for i in range(top + 1, buttom):
+        for i in range(top + 1, bottom):
             if not grid[i][left - 1].is_reset() and not grid[i][right + 1].is_reset():
                 available_idxes.append(i)
  
     else:
         for i in range(left + 1, right):
-            if not grid[top - 1][i].is_reset() and not grid[buttom + 1][i].is_reset():
+            if not grid[top - 1][i].is_reset() and not grid[bottom + 1][i].is_reset():
                 available_idxes.append(i)
 
     return available_idxes
     
  
-def build_wall(draw, grid, horizontal: bool, index,  buttom, top, left, right, animation: bool):
+def build_wall(draw, grid, horizontal: bool, index,  bottom, top, left, right, animation: bool):
     if horizontal:
         for j in range(left, right + 1):
             grid[index][j].make_barrier()
@@ -307,7 +309,7 @@ def build_wall(draw, grid, horizontal: bool, index,  buttom, top, left, right, a
                 draw()
     
     else:
-        for i in range(top, buttom + 1):
+        for i in range(top, bottom + 1):
             grid[i][index].make_barrier()
             if aborted():
                 return
@@ -315,7 +317,7 @@ def build_wall(draw, grid, horizontal: bool, index,  buttom, top, left, right, a
                 draw()
             
 
-def carve_path(draw, grid, horizontal: bool, index,  buttom, top, left, right, animation: bool):
+def carve_path(draw, grid, horizontal: bool, index,  bottom, top, left, right, animation: bool):
     if horizontal :    
         rand_idx = random.randint(left, right)
         grid[index][rand_idx].reset()
@@ -323,17 +325,33 @@ def carve_path(draw, grid, horizontal: bool, index,  buttom, top, left, right, a
             draw()
 
     else:
-        rand_idx = random.randint(top, buttom)
+        rand_idx = random.randint(top, bottom)
         grid[rand_idx][index].reset()
         if animation:
             draw()
  
 
-def draw_outside_border(draw, grid):
-    for i, row in enumerate(grid.raw_grid):
-        for j, cell in enumerate(row):
-            if aborted():
-                return
-            if i == 0 or i == grid.total_rows - 1 or j == 0 or j == grid.total_rows - 1:
-                cell.make_barrier()
-                draw()
+def draw_outside_border(draw, grid, animation):
+    for cell in grid[0]:  # top border
+        cell.make_barrier()
+        if animation:
+            draw()
+
+    for i in range(grid.total_rows): #right border
+        grid[i][grid.total_rows - 1].make_barrier() 
+        if animation:
+            draw()
+
+    bottom_border = grid[grid.total_rows - 1] #bottom border
+    bottom_border.reverse()
+    for cell in bottom_border:  
+        cell.make_barrier()
+        if animation:
+            draw()
+
+    left_border = [grid[i][0] for i in range(grid.total_rows)] #left border
+    left_border.reverse()
+    for cell in left_border:
+        cell.make_barrier()
+        if animation:
+            draw()     
