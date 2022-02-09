@@ -4,12 +4,12 @@ import pygame
 from grid import Grid
 from pygame import Color
 
-GREY = (130, 127, 125)
+GRID_SIZE = (40, 60)
+GRID_DIMENSIONS = (1200, 800)
 
-ROWS = 50
-WIDTH = 800
 ANIMATION = True
-WIN = pygame.display.set_mode((WIDTH, WIDTH))
+
+WIN = pygame.display.set_mode(GRID_DIMENSIONS)
 LOGO = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'logo.png')).convert_alpha(), (35, 35))
 pygame.display.set_caption("Pathfinding Visualizer")
 pygame.display.set_icon(LOGO)
@@ -23,8 +23,8 @@ def draw(win, grid) -> None:
 
 
 
-def main(win, rows, width) -> None:
-    grid = Grid(win, rows, width)
+def main() -> None:
+    grid = Grid(WIN, GRID_SIZE, GRID_DIMENSIONS)
 
     start = None
     end = None
@@ -32,7 +32,7 @@ def main(win, rows, width) -> None:
     running = True
 
     while running:
-        draw(win, grid)
+        draw(WIN, grid)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -72,23 +72,23 @@ def main(win, rows, width) -> None:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and start and end:
                     grid.update_neighbors_for_every_cell()
-                    algo.astar(lambda: draw(win, grid), grid, start, end, ANIMATION)
+                    algo.astar(lambda: draw(WIN, grid), grid, start, end, ANIMATION)
 
                 # clear the table
                 if event.key == pygame.K_c:
                     start = None
                     end = None
-                    grid = Grid(win, rows, width)
+                    grid = Grid(WIN, GRID_SIZE, GRID_DIMENSIONS)
 
                 if event.key == pygame.K_m:
                     start = grid[1][1]
                     end = None
                     grid.update_neighbors_for_every_cell()
-                    algo.recursive_division_maze_gen(lambda: draw(win, grid), start, grid, ANIMATION)
+                    algo.recursive_division_maze_gen(lambda: draw(WIN, grid), start, grid, ANIMATION)
                     start.make_start()
 
     pygame.quit()
 
 
 if __name__ == '__main__':
-    main(WIN, ROWS, WIDTH)
+    main()

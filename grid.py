@@ -6,12 +6,14 @@ GREY = (130, 127, 125)
 
 class Grid:
 
-    def __init__(self, win, rows, width):
+    def __init__(self, win, grid_size, grid_dimensions):
         self.win = win 
-        self.total_rows = rows
-        self.width = width
-        self.height = width
-        self.gap = self.width // self.total_rows
+        self.grid_size = grid_size
+        self.total_rows = grid_size[0]
+        self.total_columns = grid_size[1]
+        self.width = grid_dimensions[0]
+        self.height = grid_dimensions[1]
+        self.gap = self.width // self.total_columns
         self.line_color = GREY
         self.raw_grid  = self.init_cells()
 
@@ -22,8 +24,8 @@ class Grid:
 
         for i in range(self.total_rows):
             raw_grid.append([])
-            for j in range(self.total_rows):
-                raw_grid[i].append(Cell(i, j, self.gap, self.total_rows))
+            for j in range(self.total_columns):
+                raw_grid[i].append(Cell(i, j, self.gap, self.grid_size))
 
         return raw_grid
         
@@ -31,8 +33,8 @@ class Grid:
     def draw_grid_lines(self) -> None:
         for i in range(self.total_rows):
             pygame.draw.line(self.win, self.line_color, (0, i * self.gap), (self.width, i * self.gap))
-            for j in range(self.total_rows):
-                pygame.draw.line(self.win, self.line_color, (j * self.gap, 0), (j * self.gap, self.width))
+            for j in range(self.total_columns):
+                pygame.draw.line(self.win, self.line_color, (j * self.gap, 0), (j * self.gap, self.height))
 
 
     def update_neighbors_for_every_cell(self) -> None:

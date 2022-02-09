@@ -1,6 +1,4 @@
-from copy import deepcopy
 import random
-from this import d
 import pygame
 from queue import PriorityQueue, Queue
 
@@ -247,7 +245,7 @@ def recursive_division_maze_gen(draw, start, grid, animation):
     top = 1
     bottom = grid.total_rows - 2
     left = 1
-    right = grid.total_rows - 2 
+    right = grid.total_columns - 2 
     draw_outside_border(draw, grid, animation)
     recursive_division(draw, grid, bottom, top, left, right, animation)
 
@@ -338,7 +336,7 @@ def draw_outside_border(draw, grid, animation):
             draw()
 
     for i in range(grid.total_rows): #right border
-        grid[i][grid.total_rows - 1].make_barrier() 
+        grid[i][grid.total_columns - 1].make_barrier() 
         if animation:
             draw()
 

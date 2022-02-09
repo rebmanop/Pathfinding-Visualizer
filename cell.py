@@ -14,11 +14,12 @@ TURQUOISE = (64, 224, 208)
 
 
 class Cell:
-	def __init__(self, row, col, width, total_rows):
+	def __init__(self, row, col, width, grid_size):
 		self.row = row
 		self.col = col
 		self.width = width
-		self.total_rows = total_rows
+		self.total_rows = grid_size[0]
+		self.total_columns = grid_size[1]
 		self.color = WHITE
 		self.neighbors = []
 		self.x = self.col * self.width
@@ -82,7 +83,7 @@ class Cell:
 		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): #up
 			self.neighbors.append(grid[self.row - 1][self.col])
 
-		if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): #right
+		if self.col < self.total_columns - 1 and not grid[self.row][self.col + 1].is_barrier(): #right
 			self.neighbors.append(grid[self.row][self.col + 1])
 
 		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): #left
