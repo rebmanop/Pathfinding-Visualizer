@@ -18,8 +18,7 @@ class Cell:
 		self.row = row
 		self.col = col
 		self.width = width
-		self.total_rows = grid_size[0]
-		self.total_columns = grid_size[1]
+		self.total_rows, self.total_columns = grid_size
 		self.color = WHITE
 		self.neighbors = []
 		self.x = self.col * self.width

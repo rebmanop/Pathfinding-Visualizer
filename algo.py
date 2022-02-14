@@ -146,7 +146,7 @@ def dijkstra(draw, grid, start, end, animation: bool) -> None:
             current.make_closed()
 
 
-def dfs(draw, grid, start, end) -> None:
+def dfs(draw, grid, start, end, animation) -> None:
     marked = {cell: False for row in grid.raw_grid for cell in row}
     stack = [start]
     came_from = {}
@@ -158,7 +158,7 @@ def dfs(draw, grid, start, end) -> None:
         
         if current == end:
             path: list = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid)
+            animate_path(draw, path, grid, animation)
             return
 
         if not marked[current]:
@@ -170,8 +170,8 @@ def dfs(draw, grid, start, end) -> None:
                     if current != start:
                         current.make_open()
 
-        
-        draw()
+        if animation:
+            draw()
 
         if current != start:
                 current.make_closed()
@@ -208,7 +208,7 @@ def random_dfs_maze_gen(draw, start, grid, animation) -> None:
             draw()
         
 
-def bfs(draw, grid, start, end):
+def bfs(draw, grid, start, end, animation: bool):
     queue = Queue()
     explored = {start}
     queue.put(start)
@@ -222,7 +222,7 @@ def bfs(draw, grid, start, end):
         
         if current == end:
             path: list = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid)
+            animate_path(draw, path, grid, animation)
             return
         
         for neighbor in current.neighbors:
@@ -233,15 +233,14 @@ def bfs(draw, grid, start, end):
                 if neighbor != end:
                     neighbor.make_open()
                 
-        
-        draw()
+        if animation:
+            draw()
 
         if current != start:
             current.make_closed()
 
 
-def recursive_division_maze_gen(draw, start, grid, animation):
-    _ = start
+def recursive_division_maze_gen(draw, start, end, grid, animation):
     top = 1
     bottom = grid.total_rows - 2
     left = 1
@@ -254,12 +253,12 @@ def recursive_division(draw, grid, bottom, top, left, right, animation):
 
     horizontal = random.choice([True, False])
 
-    available_idxes = get_available_indxs(grid, bottom, top, left, right, horizontal)
+    available_idxes = get_available_indxes(grid, bottom, top, left, right, horizontal)
     
 
     if len(available_idxes) == 0:
         horizontal = not horizontal
-        available_idxes = get_available_indxs(grid, bottom, top, left, right, horizontal)
+        available_idxes = get_available_indxes(grid, bottom, top, left, right, horizontal)
 
         if len(available_idxes) == 0:
             return
@@ -279,7 +278,7 @@ def recursive_division(draw, grid, bottom, top, left, right, animation):
         recursive_division(draw, grid, bottom, top, left, wall_idx - 1,  animation)
 
 
-def get_available_indxs(grid, bottom, top, left, right, horizontal):
+def get_available_indxes(grid, bottom, top, left, right, horizontal):
     """returns list of valid wall indexes, so future wall wouldn't block exit out of the room 
         and wouldn't spawn rigth next to existing wall"""
     
@@ -340,7 +339,7 @@ def draw_outside_border(draw, grid, animation):
         if animation:
             draw()
 
-    bottom_border = grid[grid.total_rows - 1] #bottom border
+    bottom_border = grid[grid.total_rows - 1][:] #bottom border
     bottom_border.reverse()
     for cell in bottom_border:  
         cell.make_barrier()
