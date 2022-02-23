@@ -1,7 +1,6 @@
 import pygame
 from cell import Cell
 
-
 GREY = (130, 127, 125)
 
 class Grid:

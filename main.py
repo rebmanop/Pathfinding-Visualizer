@@ -1,4 +1,5 @@
 import os
+import maze
 import algo
 import pygame
 from grid import Grid
@@ -17,7 +18,7 @@ GRID_SIZE = (36, 64) #(rows, columns)
 GRID_DIMENSIONS = (1280, 720) #px  
 
 
-ANIMATION = False
+ANIMATION = True
 
 
 WIN = pygame.display.set_mode(GRID_DIMENSIONS)
@@ -109,23 +110,15 @@ def main() -> None:
 
                 #generate recursive division maze
                 if event.key == pygame.K_m:
-                    grid.clear()
-                    start = grid[0][1]
-                    end = grid[grid.total_rows - 1][grid.total_columns - 2]
+                    grid.clear(start_end_except=True)
                     grid.update_neighbors_for_every_cell()
-                    algo.recursive_division_maze_gen(lambda: draw(WIN, grid), start, end, grid, ANIMATION)
-                    start.make_start()
-                    end.make_end()
+                    maze.recursive_division_maze_gen(lambda: draw(WIN, grid), grid, ANIMATION)
                 
                 #generate random dfs maze
                 if event.key == pygame.K_n:
-                    grid.clear()
-                    start = grid[0][0]
-                    end = grid[grid.total_rows - 1][grid.total_columns - 1]
+                    grid.clear(start_end_except=True)
                     grid.update_neighbors_for_every_cell()
-                    algo.random_dfs_maze_gen(lambda: draw(WIN, grid), start, grid, ANIMATION)
-                    start.make_start()
-                    end.make_end()
+                    maze.random_dfs_maze_gen(lambda: draw(WIN, grid), (start, end), grid, ANIMATION)
                    
 
     pygame.quit()
