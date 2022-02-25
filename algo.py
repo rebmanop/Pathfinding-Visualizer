@@ -1,7 +1,5 @@
-import random
 import pygame
 from grid import Grid
-from copy import deepcopy
 from queue import PriorityQueue, Queue
 
 def aborted() -> bool:
@@ -17,7 +15,6 @@ def aborted() -> bool:
 
 def reconstruct_path(came_from, current) -> list: 
     path = []
-    
     while current in came_from:
         current = came_from[current]
         path.append(current)
@@ -209,4 +206,46 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
         if current != start:
             current.make_closed()
 
-    
+
+def gbfs(draw, grid: Grid, start, end, animation: bool):
+    queue = PriorityQueue()
+    visited = {start}
+    came_from = {}
+    count = 0
+    queue.put((heuristic(start.get_pos(), end.get_pos()), count,start))
+
+    while not queue.empty():
+        if aborted():
+            return
+
+        current_cell = queue.get()[2]
+
+        if current_cell != start:
+            current_cell.make_closed()
+        
+        for neighbor in current_cell.neighbors:
+            if neighbor not in visited:
+                count += 1
+                if neighbor.is_end():
+                    path = []
+                    path.append(current_cell)
+                    while current_cell in came_from:
+                        current_cell = came_from[current_cell]
+                        path.append(current_cell)
+                    path.reverse() 
+                    path.pop(0) 
+                    animate_path(draw, path, grid, animation)
+                    return
+
+                else:
+                    came_from[neighbor] = current_cell
+                    visited.add(neighbor)
+                    queue.put((heuristic(neighbor.get_pos(), end.get_pos()), count, neighbor))
+                    if  neighbor != start:
+                        neighbor.make_open()
+
+          
+        if animation:
+            draw()
+
+

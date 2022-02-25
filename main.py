@@ -102,7 +102,7 @@ def main() -> None:
                 if event.key == pygame.K_SPACE and start and end:
                     grid.clear(start_end_except=True, barrier_except=True)
                     grid.update_neighbors_for_every_cell()
-                    algo.astar(lambda: draw(WIN, grid), grid, start, end, ANIMATION)
+                    algo.gbfs(lambda: draw(WIN, grid), grid, start, end, ANIMATION)
 
                 #clear the grid
                 if event.key == pygame.K_c:
