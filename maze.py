@@ -1,7 +1,8 @@
-import pygame
 import random
 from grid import Grid
 from copy import deepcopy
+from utils import aborted
+
 
 class RoomCoordinates:
     def __init__(self, grid: Grid):
@@ -11,17 +12,6 @@ class RoomCoordinates:
         self.right = grid.total_columns - 2 
 
 
-def aborted() -> bool:
-    for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    return True
-
-
 def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:    
     grid.make_all_cells_barrier()
     points[0].make_start()
@@ -29,7 +19,6 @@ def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:
     start = grid[0][0]
     visited_set = {start}
     stack = [start]
-
 
     while len(stack) > 0:
         if aborted():
@@ -178,3 +167,6 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
             cell.make_barrier()
         if animation:
             draw()     
+
+
+

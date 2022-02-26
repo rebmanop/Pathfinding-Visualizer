@@ -1,4 +1,9 @@
+from enum import Enum
+from inspect import currentframe
+from locale import currency
 import os
+
+from numpy import cumprod
 import maze
 import algo
 import pygame
@@ -34,6 +39,13 @@ def draw(win, grid) -> None:
     pygame.display.update()
 
 
+class CurrentAlgorithm(Enum):
+    astar = 0
+    dijkstra = 1
+    dfs = 2 
+    bfs = 3 
+    gbfs = 4
+ 
 def main() -> None:
     grid = Grid(WIN, GRID_SIZE, GRID_DIMENSIONS)
 
@@ -43,9 +55,15 @@ def main() -> None:
     start.make_start()
     end.make_end()
 
+    print(CurrentAlgorithm.bfs.value)
+    current_algorithm = CurrentAlgorithm(4)
+    
+
     running = True
     start_being_dragged = False
     end_being_dragged = False
+    algo_visualized = False
+
 
     while running:
         draw(WIN, grid)
@@ -68,6 +86,7 @@ def main() -> None:
                 elif clicked_cell.is_end():
                     end_being_dragged = True
 
+
             #if right mouse button clicked
             elif pygame.mouse.get_pressed()[2]:
                 mpos = pygame.mouse.get_pos()
@@ -81,7 +100,27 @@ def main() -> None:
                 mpos = pygame.mouse.get_pos()
                 row, col = grid.get_row_col_of_clicked_cell(mpos)
                 if not grid[row][col].is_barrier():
-                    if start_being_dragged and not grid[row][col].is_end():
+                    
+                    if start_being_dragged and not grid[row][col].is_end() and algo_visualized:
+                        start.reset()
+                        start = grid[row][col]
+                        start.make_start()
+                        grid.clear(start_end_except=True, barrier_except=True)
+                        grid.update_neighbors_for_every_cell()
+                        run_current_algorithm(current_algorithm, lambda: draw(WIN, grid), grid, start, end, animation=False)
+
+                    
+                    elif end_being_dragged and not grid[row][col].is_start() and algo_visualized:
+                        end.reset()
+                        end = grid[row][col]
+                        end.make_end()
+                        grid.clear(start_end_except=True, barrier_except=True)
+                        grid.update_neighbors_for_every_cell()
+                        run_current_algorithm(current_algorithm, lambda: draw(WIN, grid), grid, start, end, animation=False)
+
+
+                    
+                    elif start_being_dragged and not grid[row][col].is_end():
                         start.reset()
                         start = grid[row][col]
                         start.make_start()
@@ -90,6 +129,7 @@ def main() -> None:
                         end.reset()
                         end = grid[row][col]
                         end.make_end()
+
 
             #drop
             if event.type == pygame.MOUSEBUTTONUP:
@@ -102,27 +142,54 @@ def main() -> None:
                 if event.key == pygame.K_SPACE and start and end:
                     grid.clear(start_end_except=True, barrier_except=True)
                     grid.update_neighbors_for_every_cell()
-                    algo.gbfs(lambda: draw(WIN, grid), grid, start, end, ANIMATION)
+                    run_current_algorithm(current_algorithm, lambda: draw(WIN, grid), grid, start, end, ANIMATION)
+                    algo_visualized = True
+
 
                 #clear the grid
                 if event.key == pygame.K_c:
-                    grid.clear(start_end_except=True)   
+                    grid.clear(start_end_except=True)
+                    algo_visualized = False
+
+
 
                 #generate recursive division maze
                 if event.key == pygame.K_m:
                     grid.clear(start_end_except=True)
                     grid.update_neighbors_for_every_cell()
                     maze.recursive_division_maze_gen(lambda: draw(WIN, grid), grid, ANIMATION)
+                    algo_visualized = False
+
                 
                 #generate random dfs maze
                 if event.key == pygame.K_n:
                     grid.clear(start_end_except=True)
                     grid.update_neighbors_for_every_cell()
                     maze.random_dfs_maze_gen(lambda: draw(WIN, grid), (start, end), grid, ANIMATION)
+                    algo_visualized = False
+
                    
 
     pygame.quit()
 
+
+def run_current_algorithm(current_alorithm: CurrentAlgorithm, draw, grid, start, end, animation: bool):
+    if current_alorithm.value == CurrentAlgorithm.astar.value:
+        algo.astar(draw, grid, start, end, animation)
+
+    elif current_alorithm.value == CurrentAlgorithm.dijkstra.value:
+        algo.dijkstra(draw, grid, start, end, animation)
+
+    elif current_alorithm.value == CurrentAlgorithm.dfs.value:
+        algo.dfs(draw, grid, start, end, animation)
+
+    elif current_alorithm.value == CurrentAlgorithm.bfs.value:
+        algo.bfs(draw, grid, start, end, animation)
+
+    elif current_alorithm.value == CurrentAlgorithm.gbfs.value:
+        algo.gbfs(draw, grid, start, end, animation)
+        
+        
 
 if __name__ == '__main__':
     main()

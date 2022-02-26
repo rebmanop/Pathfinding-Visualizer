@@ -1,16 +1,6 @@
-import pygame
 from grid import Grid
 from queue import PriorityQueue, Queue
-
-def aborted() -> bool:
-    for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    return True
+from utils import aborted, Heuristic
 
 
 def reconstruct_path(came_from, current) -> list: 
@@ -45,14 +35,8 @@ def reset_opened_cells(draw, grid, animation: bool):
         for cell in row:
             if cell.is_open():
                 cell.reset()
-                if animation:
-                    draw()
-
-
-def heuristic(p1, p2) -> int:
-    x1, y1 = p1
-    x2, y2 = p2
-    return abs(x1 - x2) + abs(y1 - y2)
+                # if animation:
+                #     draw()
 
 
 def astar(draw, grid, start, end, animation: bool) -> None:
@@ -63,7 +47,7 @@ def astar(draw, grid, start, end, animation: bool) -> None:
     g_score = {cell: float("inf") for row in grid.raw_grid for cell in row}
     g_score[start] = 0
     f_score = {cell: float("inf") for row in grid.raw_grid for cell in row}
-    f_score[start] = heuristic(start.get_pos(), end.get_pos())
+    f_score[start] = Heuristic.manhattan(start.get_pos(), end.get_pos())
 
     open_set_hash = {start}
 
@@ -85,7 +69,7 @@ def astar(draw, grid, start, end, animation: bool) -> None:
             if temp_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
                 g_score[neighbor] = temp_g_score
-                f_score[neighbor] = temp_g_score + heuristic(neighbor.get_pos(), end.get_pos())
+                f_score[neighbor] = temp_g_score + Heuristic.manhattan(neighbor.get_pos(), end.get_pos())
                 
                 if neighbor not in open_set_hash:
                     count += 1
@@ -212,7 +196,7 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
     visited = {start}
     came_from = {}
     count = 0
-    queue.put((heuristic(start.get_pos(), end.get_pos()), count,start))
+    queue.put((Heuristic.manhattan(start.get_pos(), end.get_pos()), count,start))
 
     while not queue.empty():
         if aborted():
@@ -240,7 +224,7 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
                 else:
                     came_from[neighbor] = current_cell
                     visited.add(neighbor)
-                    queue.put((heuristic(neighbor.get_pos(), end.get_pos()), count, neighbor))
+                    queue.put((Heuristic.manhattan(neighbor.get_pos(), end.get_pos()), count, neighbor))
                     if  neighbor != start:
                         neighbor.make_open()
 
