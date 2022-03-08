@@ -38,7 +38,7 @@ def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:
                     
             
             stack.append(neighbors[random_index])
-            if not current.is_reset() and not current.is_start() and not current.is_end():
+            if not current.is_unvisited() and not current.is_start() and not current.is_end():
                 current.reset()
 
         if animation:
@@ -52,10 +52,16 @@ def recursive_division_maze_gen(draw, grid: Grid, animation: bool) -> None:
 
 
 def recursive_division(draw, grid: Grid, coordinates: RoomCoordinates, animation: bool) -> None:
-    horizontal = random.choice([True, False])
+
+    if (coordinates.bottom - coordinates.top) < (coordinates.right - coordinates.left):
+        horizontal = False
+    elif (coordinates.bottom - coordinates.top) > (coordinates.right - coordinates.left):
+        horizontal = True
+    else:
+        horizontal = random.choice([True, False])
 
     available_idxes = get_available_indxes(grid, coordinates, horizontal)
-
+    
     if len(available_idxes) == 0:
         horizontal = not horizontal
         available_idxes = get_available_indxes(grid, coordinates, horizontal)
@@ -63,7 +69,12 @@ def recursive_division(draw, grid: Grid, coordinates: RoomCoordinates, animation
         if len(available_idxes) == 0:
             return
 
-    wall_idx = random.choice(available_idxes)
+
+    if len(available_idxes) == 1:
+        wall_idx = available_idxes.pop()    
+    else:
+        wall_idx = available_idxes[len(available_idxes) // 2 ]
+
 
     build_wall(draw, grid, horizontal, wall_idx, coordinates, animation)
     carve_path(draw, grid, horizontal, wall_idx, coordinates, animation)
@@ -85,19 +96,19 @@ def recursive_division(draw, grid: Grid, coordinates: RoomCoordinates, animation
         recursive_division(draw, grid, coordinates_copy, animation)
 
 
-def get_available_indxes(grid: Grid, coordinates: RoomCoordinates, horizontal: bool) -> None:
+def get_available_indxes(grid: Grid, coordinates: RoomCoordinates, horizontal: bool) -> list:
     """returns list of valid wall indexes, so future wall wouldn't block exit out of the room 
         and wouldn't spawn rigth next to existing wall"""
     
     available_idxes = []
     if horizontal:
         for i in range(coordinates.top + 1, coordinates.bottom):
-            if not grid[i][coordinates.left - 1].is_reset() and not grid[i][coordinates.right + 1].is_reset():
+            if not grid[i][coordinates.left - 1].is_unvisited() and not grid[i][coordinates.right + 1].is_unvisited():
                 available_idxes.append(i)
  
     else:
         for j in range(coordinates.left + 1, coordinates.right):
-            if not grid[coordinates.top - 1][j].is_reset() and not grid[coordinates.bottom + 1][j].is_reset():
+            if not grid[coordinates.top - 1][j].is_unvisited() and not grid[coordinates.bottom + 1][j].is_unvisited():
                 available_idxes.append(j)
 
     return available_idxes
@@ -107,7 +118,7 @@ def build_wall(draw, grid: Grid, horizontal: bool, index: int, coordinates: Room
     if horizontal:
         for j in range(coordinates.left, coordinates.right + 1):
             if not grid[index][j].is_start() and not grid[index][j].is_end():
-                grid[index][j].make_barrier()
+                grid[index][j].make_wall()
             if aborted():
                 return
             if animation:
@@ -116,7 +127,7 @@ def build_wall(draw, grid: Grid, horizontal: bool, index: int, coordinates: Room
     else:
         for i in range(coordinates.top, coordinates.bottom + 1):
             if not grid[i][index].is_start() and not grid[i][index].is_end():
-                grid[i][index].make_barrier()
+                grid[i][index].make_wall()
             if aborted():
                 return
             if animation:
@@ -142,13 +153,13 @@ def carve_path(draw, grid: Grid, horizontal: bool, index: int, coordinates: Room
 def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
     for cell in grid[0]:  # top border
         if not cell.is_start() and not cell.is_end():
-            cell.make_barrier()
+            cell.make_wall()
         if animation:
             draw()
 
     for i in range(grid.total_rows): #right border
         if not grid[i][grid.total_columns - 1].is_start() and not grid[i][grid.total_columns - 1].is_end():
-            grid[i][grid.total_columns - 1].make_barrier() 
+            grid[i][grid.total_columns - 1].make_wall() 
         if animation:
             draw()
 
@@ -156,7 +167,7 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
     bottom_border.reverse()
     for cell in bottom_border:  
         if not cell.is_start() and not cell.is_end():
-            cell.make_barrier()
+            cell.make_wall()
         if animation:
             draw()
 
@@ -164,7 +175,7 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
     left_border.reverse()
     for cell in left_border:
         if not cell.is_start() and not cell.is_end():
-            cell.make_barrier()
+            cell.make_wall()
         if animation:
             draw()     
 

@@ -1,7 +1,11 @@
 import pygame
 from cell import Cell
+import os
 
 GREY = (130, 127, 125)
+
+
+
 
 class Grid:
     def __init__(self, win, grid_size, grid_dimensions):
@@ -38,10 +42,17 @@ class Grid:
                 cell.update_neighbors(self.raw_grid)
 
 
-    def draw_cells(self) -> None:
+    def draw_under_grid_cells(self) -> None:
         for row in self.raw_grid:
             for cell in row:
-                cell.draw(self.win)
+                if not cell.is_wall() or not cell.is_path():
+                    cell.draw(self.win)
+
+    def draw_over_grid_cells(self) -> None:
+        for row in self.raw_grid:
+            for cell in row:
+                if cell.is_wall() or cell.is_path(): 
+                    cell.draw(self.win)
 
 
     def get_cell(self, row: int, col: int) -> Cell:
@@ -62,7 +73,7 @@ class Grid:
         if start_end_except == True and barrier_except == True:       
             for row in self.raw_grid:
                 for  cell in row:
-                    if not cell.is_start() and not cell.is_end() and not cell.is_barrier(): 
+                    if not cell.is_start() and not cell.is_end() and not cell.is_wall(): 
                         cell.reset()
 
         elif start_end_except == True:
@@ -79,10 +90,10 @@ class Grid:
 
 
 
-    def make_all_cells_barrier(self) -> None:
+    def make_all_cells_wall(self) -> None:
         for row in self.raw_grid:
             for cell in row:
-                cell.make_barrier()
+                cell.make_wallr()
 
 
     def __getitem__(self, row):

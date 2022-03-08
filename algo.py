@@ -82,7 +82,7 @@ def astar(draw, grid, start, end, animation: bool) -> None:
             draw()
 
         if current != start:
-            current.make_closed()
+            current.visit()
 
    
 def dijkstra(draw, grid, start, end, animation: bool) -> None:
@@ -125,7 +125,7 @@ def dijkstra(draw, grid, start, end, animation: bool) -> None:
             draw()
 
         if current != start:
-            current.make_closed()
+            current.visit()
 
 
 def dfs(draw, grid, start, end, animation) -> None:
@@ -156,7 +156,7 @@ def dfs(draw, grid, start, end, animation) -> None:
             draw()
 
         if current != start:
-                current.make_closed()
+                current.visit()
 
 
 def bfs(draw, grid, start, end, animation: bool)  -> None:
@@ -188,7 +188,7 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
             draw()
 
         if current != start:
-            current.make_closed()
+            current.visit()
 
 
 def gbfs(draw, grid: Grid, start, end, animation: bool):
@@ -205,7 +205,7 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
         current_cell = queue.get()[2]
 
         if current_cell != start:
-            current_cell.make_closed()
+            current_cell.visit()
         
         for neighbor in current_cell.neighbors:
             if neighbor not in visited:
