@@ -162,6 +162,13 @@ def main() -> None:
                     maze.random_dfs_maze_gen(lambda: draw(WIN, grid), (start, end), grid, ANIMATION)
                     algo_visualized = False
 
+                # generate spiral maze
+                if event.key == pygame.K_s:
+                    grid.clear(start_end_except=True)
+                    grid.update_neighbors_by_direction_for_every_cell()
+                    maze.spiral_maze(lambda: draw(WIN, grid), grid, (start, end), ANIMATION)
+                    algo_visualized = False
+
                    
 
     pygame.quit()
@@ -182,8 +189,10 @@ def run_current_algorithm(current_alorithm: CurrentAlgorithm, draw, grid, start,
 
     elif current_alorithm.value == CurrentAlgorithm.GBFS.value:
         algo.gbfs(draw, grid, start, end, animation)
+    
+    else: 
+        algo.astar(draw, grid, start, end, animation)
         
         
-
 if __name__ == '__main__':
     main()

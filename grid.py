@@ -1,11 +1,8 @@
 import pygame
 from cell import Cell
-import os
+
 
 GREY = (130, 127, 125)
-
-
-
 
 class Grid:
     def __init__(self, win, grid_size, grid_dimensions):
@@ -40,6 +37,11 @@ class Grid:
         for row in self.raw_grid:
             for cell in row:
                 cell.update_neighbors(self.raw_grid)
+
+    def update_neighbors_by_direction_for_every_cell(self) -> None:
+        for row in self.raw_grid:
+            for cell in row:
+                cell.update_neighbors_by_direction(self.raw_grid)
 
 
     def draw_under_grid_cells(self) -> None:
@@ -93,7 +95,7 @@ class Grid:
     def make_all_cells_wall(self) -> None:
         for row in self.raw_grid:
             for cell in row:
-                cell.make_wallr()
+                cell.make_wall()
 
 
     def __getitem__(self, row):

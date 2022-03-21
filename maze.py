@@ -1,8 +1,9 @@
 import random
+import pygame
 from grid import Grid
 from copy import deepcopy
 from utils import aborted
-
+from itertools import cycle
 
 class RoomCoordinates:
     def __init__(self, grid: Grid):
@@ -13,7 +14,7 @@ class RoomCoordinates:
 
 
 def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:    
-    grid.make_all_cells_barrier()
+    grid.make_all_cells_wall()
     points[0].make_start()
     points[1].make_end()
     start = grid[0][0]
@@ -178,6 +179,65 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
             cell.make_wall()
         if animation:
             draw()     
+
+
+def spiral_maze(draw, grid: Grid, points: tuple, animation: bool) -> None:
+    grid.make_all_cells_wall()
+    points[0].make_start()
+    points[1].make_end()
+    current = grid[0][0]
+    directions = cycle([0, 1, 2, 3])
+    if not current.is_start() and not current.is_end():
+        current.reset()
+    
+    while True:
+        direction = next(directions)
+        
+        if current.neighbors_by_direction[direction].is_unvisited():
+            current.neighbors_by_direction[next(directions)].make_wall()
+            break 
+        
+        neighbor = None
+
+        while True:
+            
+            if aborted():
+                return
+
+            current = current.neighbors_by_direction[direction]
+            
+            if not current.is_start() and not current.is_end():
+                current.reset()
+
+            neighbor = current.neighbors_by_direction[direction]
+
+            if animation:
+                draw()
+
+            if (neighbor.neighbors_by_direction[direction] != None 
+                and neighbor.neighbors_by_direction[direction].is_unvisited()): 
+                break
+            elif neighbor.neighbors_by_direction[direction] == None:
+                break
+
+    for _ in range(max(grid.total_rows, grid.total_columns)):
+        i = random.randrange(1, grid.total_rows - 1)
+        j = random.randrange(1, grid.total_columns - 1)
+        if not grid[i][j].is_start() and not grid[i][j].is_end():
+            grid[random.randrange(1, grid.total_rows - 1)][random.randrange(1, grid.total_columns - 1)].reset()
+
+    
+
+
+
+
+        
+
+
+
+
+
+
 
 
 

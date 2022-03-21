@@ -22,6 +22,7 @@ class Cell:
 		self.total_rows, self.total_columns = grid_size
 		self.color = UNVISITED_COLOR
 		self.neighbors = []
+		self.neighbors_by_direction = {}
 		self.x = self.col * self.width
 		self.y = self.row * self.width
 	
@@ -94,6 +95,29 @@ class Cell:
 
 		if self.col > 0 and not grid[self.row][self.col - 1].is_wall(): #left
 			self.neighbors.append(grid[self.row][self.col - 1])
+
+
+	def update_neighbors_by_direction(self, grid):
+		self.neighbors_by_direction = {}
+		if self.row < self.total_rows - 1 : 
+			self.neighbors_by_direction[1] = grid[self.row + 1][self.col]
+		else:
+			self.neighbors_by_direction[1] = None
+
+		if self.row > 0: 
+			self.neighbors_by_direction[3] = grid[self.row - 1][self.col]
+		else:
+			self.neighbors_by_direction[3] = None
+
+		if self.col < self.total_columns - 1:
+			self.neighbors_by_direction[0] = grid[self.row][self.col + 1]
+		else:
+			self.neighbors_by_direction[0] = None
+
+		if self.col > 0: 
+			self.neighbors_by_direction[2] = grid[self.row][self.col - 1]
+		else:
+			self.neighbors_by_direction[2] = None
 	
 	@staticmethod
 	def init_cell_imgs(cell_dimensions: tuple[int, int])-> None:
