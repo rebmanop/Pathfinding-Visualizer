@@ -15,7 +15,7 @@ class Cell:
 	POINT_B_IMG = None
 
 
-	def __init__(self, row, col, width, grid_size):
+	def __init__(self, row, col, width, grid_size, grid_position):
 		self.row = row
 		self.col = col
 		self.width = width
@@ -23,8 +23,8 @@ class Cell:
 		self.color = UNVISITED_COLOR
 		self.neighbors = []
 		self.neighbors_by_direction = {}
-		self.x = self.col * self.width
-		self.y = self.row * self.width
+		self.x = grid_position[0] + self.col * self.width
+		self.y = grid_position[1] + self.row * self.width
 	
 
 	def get_pos(self):
@@ -77,6 +77,7 @@ class Cell:
 
 	def draw(self, win):
 		if self.is_start() or self.is_end():
+			pygame.draw.rect(win, UNVISITED_COLOR, (self.x, self.y, self.width, self.width))
 			win.blit(self.color, (self.x, self.y))	
 		else:
 			pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
@@ -98,26 +99,26 @@ class Cell:
 
 
 	def update_neighbors_by_direction(self, grid):
-		self.neighbors_by_direction = {}
+		self.neighbor_by_direction = {}
 		if self.row < self.total_rows - 1 : 
-			self.neighbors_by_direction[1] = grid[self.row + 1][self.col]
+			self.neighbor_by_direction["down"] = grid[self.row + 1][self.col]
 		else:
-			self.neighbors_by_direction[1] = None
+			self.neighbor_by_direction["down"] = None
 
 		if self.row > 0: 
-			self.neighbors_by_direction[3] = grid[self.row - 1][self.col]
+			self.neighbor_by_direction["up"] = grid[self.row - 1][self.col]
 		else:
-			self.neighbors_by_direction[3] = None
+			self.neighbor_by_direction["up"] = None
 
 		if self.col < self.total_columns - 1:
-			self.neighbors_by_direction[0] = grid[self.row][self.col + 1]
+			self.neighbor_by_direction["right"] = grid[self.row][self.col + 1]
 		else:
-			self.neighbors_by_direction[0] = None
+			self.neighbor_by_direction["right"] = None
 
 		if self.col > 0: 
-			self.neighbors_by_direction[2] = grid[self.row][self.col - 1]
+			self.neighbor_by_direction["left"] = grid[self.row][self.col - 1]
 		else:
-			self.neighbors_by_direction[2] = None
+			self.neighbor_by_direction["left"] = None
 	
 	@staticmethod
 	def init_cell_imgs(cell_dimensions: tuple[int, int])-> None:

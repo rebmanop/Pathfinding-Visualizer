@@ -14,6 +14,7 @@ class RoomCoordinates:
 
 
 def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:    
+    grid.update_neighbors_for_every_cell()
     grid.make_all_cells_wall()
     points[0].make_start()
     points[1].make_end()
@@ -47,6 +48,7 @@ def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:
         
 
 def recursive_division_maze_gen(draw, grid: Grid, animation: bool) -> None:
+    grid.update_neighbors_for_every_cell()
     coordinates = RoomCoordinates(grid)
     draw_outside_border(draw, grid, animation)
     recursive_division(draw, grid, coordinates, animation)
@@ -181,20 +183,21 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
             draw()     
 
 
-def spiral_maze(draw, grid: Grid, points: tuple, animation: bool) -> None:
+def spiral_maze(draw, points: tuple, grid: Grid, animation: bool) -> None:
+    grid.update_neighbors_by_direction_for_every_cell()
     grid.make_all_cells_wall()
     points[0].make_start()
     points[1].make_end()
     current = grid[0][0]
-    directions = cycle([0, 1, 2, 3])
+    directions = cycle(["right", "down", "left", "up"])
     if not current.is_start() and not current.is_end():
         current.reset()
     
     while True:
         direction = next(directions)
         
-        if current.neighbors_by_direction[direction].is_unvisited():
-            current.neighbors_by_direction[next(directions)].make_wall()
+        if current.neighbor_by_direction[direction].is_unvisited():
+            current.neighbor_by_direction[next(directions)].make_wall()
             break 
         
         neighbor = None
@@ -204,20 +207,20 @@ def spiral_maze(draw, grid: Grid, points: tuple, animation: bool) -> None:
             if aborted():
                 return
 
-            current = current.neighbors_by_direction[direction]
+            current = current.neighbor_by_direction[direction]
             
             if not current.is_start() and not current.is_end():
                 current.reset()
 
-            neighbor = current.neighbors_by_direction[direction]
+            neighbor = current.neighbor_by_direction[direction]
 
             if animation:
                 draw()
 
-            if (neighbor.neighbors_by_direction[direction] != None 
-                and neighbor.neighbors_by_direction[direction].is_unvisited()): 
+            if (neighbor.neighbor_by_direction[direction] != None 
+                and neighbor.neighbor_by_direction[direction].is_unvisited()): 
                 break
-            elif neighbor.neighbors_by_direction[direction] == None:
+            elif neighbor.neighbor_by_direction[direction] == None:
                 break
 
     for _ in range(max(grid.total_rows, grid.total_columns)):

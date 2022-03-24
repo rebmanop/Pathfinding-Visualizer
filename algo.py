@@ -152,7 +152,7 @@ def dfs(draw, grid, start, end, animation) -> None:
                     if current != start:
                         current.make_open()
 
-        if animation:
+        if animation and not current.is_visited():
             draw()
 
         if current != start:

@@ -5,14 +5,17 @@ from cell import Cell
 GREY = (130, 127, 125)
 
 class Grid:
-    def __init__(self, win, grid_size, grid_dimensions):
+    def __init__(self, win, grid_size, grid_dimensions, grid_position):
         self.win = win 
         self.grid_size = grid_size
         self.total_rows, self.total_columns = grid_size
-        self.width, self.height = grid_dimensions
+        self.width, self.height  = grid_dimensions
         self.gap = self.width // self.total_columns
         self.line_color = GREY
+        self.grid_position = grid_position
+        self.x, self.y = self.grid_position
         self.raw_grid  = self.init_cells()
+        
 
 
     def init_cells(self):
@@ -21,16 +24,16 @@ class Grid:
         for i in range(self.total_rows):
             raw_grid.append([])
             for j in range(self.total_columns):
-                raw_grid[i].append(Cell(i, j, self.gap, self.grid_size))
+                raw_grid[i].append(Cell(i, j, self.gap, self.grid_size, self.grid_position))
 
         return raw_grid
         
 
     def draw_grid_lines(self) -> None:
-        for i in range(self.total_rows):
-            pygame.draw.line(self.win, self.line_color, (0, i * self.gap), (self.width, i * self.gap))
-            for j in range(self.total_columns):
-                pygame.draw.line(self.win, self.line_color, (j * self.gap, 0), (j * self.gap, self.height))
+        for i in range(self.total_rows + 1):
+            pygame.draw.line(self.win, self.line_color, (0, self.y + i * self.gap), (self.x + self.width, self.y + i * self.gap))
+            for j in range(self.total_columns + 1):
+                pygame.draw.line(self.win, self.line_color, (self.x + j * self.gap, self.y), (self.x + j * self.gap, self.y + self.height))
 
 
     def update_neighbors_for_every_cell(self) -> None:
@@ -64,8 +67,8 @@ class Grid:
     def get_row_col_of_clicked_cell(self, mpos) -> tuple:
         x, y = mpos
 
-        row = y // self.gap
-        col = x // self.gap
+        row =  (y - self.y) // self.gap
+        col = (x - self.x) // self.gap
 
         return row, col 
     
