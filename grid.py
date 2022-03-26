@@ -31,7 +31,7 @@ class Grid:
 
     def draw_grid_lines(self) -> None:
         for i in range(self.total_rows + 1):
-            pygame.draw.line(self.win, self.line_color, (0, self.y + i * self.gap), (self.x + self.width, self.y + i * self.gap))
+            pygame.draw.line(self.win, self.line_color, (self.x, self.y + i * self.gap), (self.x + self.width, self.y + i * self.gap))
             for j in range(self.total_columns + 1):
                 pygame.draw.line(self.win, self.line_color, (self.x + j * self.gap, self.y), (self.x + j * self.gap, self.y + self.height))
 
@@ -50,13 +50,13 @@ class Grid:
     def draw_under_grid_cells(self) -> None:
         for row in self.raw_grid:
             for cell in row:
-                if not cell.is_wall() or not cell.is_path():
+                if not cell.is_wall():
                     cell.draw(self.win)
 
     def draw_over_grid_cells(self) -> None:
         for row in self.raw_grid:
             for cell in row:
-                if cell.is_wall() or cell.is_path(): 
+                if cell.is_wall(): 
                     cell.draw(self.win)
 
 
@@ -69,8 +69,8 @@ class Grid:
 
         row =  (y - self.y) // self.gap
         col = (x - self.x) // self.gap
-
-        return row, col 
+        
+        return int(row), int(col) 
     
     
     def clear(self, start_end_except = False, barrier_except = False) -> None:
@@ -99,6 +99,15 @@ class Grid:
         for row in self.raw_grid:
             for cell in row:
                 cell.make_wall()
+
+
+    def mouse_on_the_grid(self) -> bool:
+        mpos = pygame.mouse.get_pos()
+        if (mpos[0] > self.x and mpos[0] < (self.x + self.width) 
+        and mpos[1] > self.y and mpos[1] < (self.y + self.height)):
+            return True
+        else:
+            return False
 
 
     def __getitem__(self, row):

@@ -32,6 +32,19 @@
          {
             "normal_bg":"#FF2024"
          }
-    }
+    },
 
+    "#legend_lable":
+    {
+        "colours":
+         {
+            "normal_text":"#45494e"
+         },
+        
+        "font_info_dict":
+         {
+            "size": "25"
+         }
+
+    }
  }

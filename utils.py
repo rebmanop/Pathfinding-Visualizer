@@ -40,3 +40,8 @@ class Heuristic:
         x1, y1 = p1
         x2, y2 = p2
         return ((y1 - y2) ** 2 + (x1 - x2) ** 2) ** 0.5
+
+
+
+
+

@@ -1,12 +1,12 @@
 import os
+from typing import Callable
 import maze
 import algo
 import pygame
 import pygame_gui
-from grid import Grid
+from grid import Grid, GREY
 from cell import Cell
-from enum import Enum
-from pygame_gui.core import ObjectID
+from strenum import StrEnum
 
 
 # """1:1  cell size = 16px"""
@@ -17,97 +17,101 @@ from pygame_gui.core import ObjectID
 # GRID_SIZE = (36, 84) #(rows, columns)
 # GRID_DIMENSIONS = (1680, 720) #px
 
-"""16:9  cell size = 20px""" 
-
-GRID_SIZE = (36, 64) #(rows, columns)
-GRID_DIMENSIONS = (1280, 720) #px
-GRID_POSITION = (0, 40)
-
-WIDTH, HEIGHT = 1280, 760
-WINDOW_DIMENSIONS = (WIDTH, HEIGHT) #px  
 
 
-BG_COLOR = (134, 232, 255)#blue sky
+WIDTH, HEIGHT = 1291, 765
+GRID_WIDTH, GRID_HEIGHT = 1280, 680
+GRID_SIZE = (34, 64) #(rows, columns)
+GRID_POSITION = ((WIDTH - GRID_WIDTH) / 2 , 40)
+
+
+GUI_ELEMENT_OFFSET = 20
+BG_COLOR = (64, 227, 206)#green
 ANIMATION = True
 
 pygame.init()
 FPS = 240
-WIN = pygame.display.set_mode(WINDOW_DIMENSIONS)
-UI_MANAGER = pygame_gui.UIManager(WINDOW_DIMENSIONS, "gui_theme.json")
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+UI_MANAGER = pygame_gui.UIManager((WIDTH, HEIGHT), "gui_theme.json")
 LOGO = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'logo.png')).convert_alpha(), (35, 35))
 pygame.display.set_caption("Pathfinding Visualizer")
 pygame.display.set_icon(LOGO)
 
 
-def draw(win, grid, ui_manager, time_delta) -> None:
+def draw(win, grid, UI_MANAGER, time_delta) -> None:
     win.fill(BG_COLOR)
     grid.draw_under_grid_cells()
     grid.draw_grid_lines()
     grid.draw_over_grid_cells()
-    ui_manager.update(time_delta)
-    ui_manager.draw_ui(WIN)
+    UI_MANAGER.update(time_delta)
+    
+    #grid frame lines
+    pygame.draw.line(win, GREY, ((grid.x - 3, grid.y)), (grid.x - 3, grid.y + grid.height), width=5)
+    pygame.draw.line(win, GREY, ((grid.x + grid.width + 3, grid.y)), (grid.x + grid.width + 3, grid.y + grid.height), width=5)
+    pygame.draw.line(win, GREY, ((0, grid.y - 2)), (WIDTH, grid.y - 2), width=5)
+    pygame.draw.line(win, GREY, ((0, grid.y + grid.height + 2)), (WIDTH, grid.y + grid.height + 2), width=5)
+    
+    UI_MANAGER.draw_ui(WIN)
     pygame.display.update()
 
 
-def mouse_on_the_grid() -> bool:
-    mpos = pygame.mouse.get_pos()
-    if (mpos[0] > GRID_POSITION[0] and mpos[0] < (GRID_POSITION[0] + GRID_DIMENSIONS[0]) 
-    and mpos[1] > GRID_POSITION[1] and mpos[1] < (GRID_POSITION[1] + GRID_DIMENSIONS[1])):
-        return True
-    else:
-        return False
-
-
-class Algorithms(Enum):
+class Algorithms(StrEnum):
     ASTAR = "A* Search"
     DIJKSTRA = "Dijkstra's Algorithm"
     DFS = "Depth-first Search" 
     BFS ="Breadth-first Search" 
     GBFS = "Greedy Best-first Search"
 
-class Mazes(Enum):
+class Mazes(StrEnum):
     RECDIV = "Recursive Division Maze"
     RANDOM_DFS = "Randomized Depth-first Search Maze"
     SPIRAL = "Spiral Maze"
+ 
 
  
 def main() -> None:
     clock = pygame.time.Clock()
-    grid = Grid(WIN, GRID_SIZE, GRID_DIMENSIONS, GRID_POSITION)
-    Cell.init_cell_imgs((grid.gap, grid.gap))
+    grid = Grid(WIN, GRID_SIZE, (GRID_WIDTH, GRID_HEIGHT), GRID_POSITION)
     
-
-    visualize_button = pygame_gui.elements.UIButton(
-                        relative_rect=pygame.Rect((5 + 230 + 20, 11), (100, 30)),
-                        text='Visualize',
-                        manager=UI_MANAGER,
-                        object_id=ObjectID(object_id='#visualize_button'))
-
-
-
-    generate_button = pygame_gui.elements.UIButton(
-                    relative_rect=pygame.Rect((5 + 250 + 20 + 100 + 305 + 20, 11), (100, 30)),
-                    text='Generate',
-                    manager=UI_MANAGER)
-
-    clear_button = pygame_gui.elements.UIButton(
-                    relative_rect=pygame.Rect((WIDTH - 55, 11), (50, 30)),
-                    text='CE',
-                    manager=UI_MANAGER)
-
-
+    #scales images to correct cell size
+    Cell.scale_cell_imgs(grid.gap, grid.gap)
+    
+    draw_lambda = lambda: draw(WIN, grid, UI_MANAGER, time_delta)
 
     algo_menu = pygame_gui.elements.UIDropDownMenu(
-    [Algorithms.ASTAR.value, Algorithms.DIJKSTRA.value, Algorithms.DFS.value, Algorithms.BFS.value, Algorithms.GBFS.value],
-    Algorithms.ASTAR.value, pygame.Rect((5,  11), (230, 30)), 
-    UI_MANAGER)
+        options_list=[algo for algo in Algorithms],
+        starting_option=Algorithms.ASTAR, 
+        relative_rect=pygame.Rect((grid.x,  grid.y / 2 - 15), (230, 30)), 
+        manager=UI_MANAGER)
+    
+    visualize_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((algo_menu.get_abs_rect().x + algo_menu.get_abs_rect().width + GUI_ELEMENT_OFFSET, grid.y / 2 - 15), (100, 30)),
+        text='Visualize',
+        manager=UI_MANAGER,
+        object_id='#visualize_button')
     
     maze_menu = pygame_gui.elements.UIDropDownMenu(
-        [Mazes.RECDIV.value, Mazes.RANDOM_DFS.value, Mazes.SPIRAL.value],
-        Mazes.RECDIV.value,
-        pygame.Rect((5 + 250 + 20 + 100,  11), (305, 30)), 
-        UI_MANAGER)
+        options_list=[maze for maze in Mazes],
+        starting_option=Mazes.RECDIV,
+        relative_rect=pygame.Rect((visualize_button.get_abs_rect().x +visualize_button.get_abs_rect().width + GUI_ELEMENT_OFFSET,  grid.y / 2 - 15), (305, 30)), 
+        manager=UI_MANAGER)
     
+    generate_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((maze_menu.get_abs_rect().x + maze_menu.get_abs_rect().width + GUI_ELEMENT_OFFSET,  grid.y / 2 - 15), (100, 30)),
+        text='Generate',
+        manager=UI_MANAGER)
+    
+    clear_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH - 55,  grid.y / 2 - 15), (50, 30)),
+        text='CE',
+        manager=UI_MANAGER)
+
+    # legend_lable_visited = pygame_gui.elements.UILabel(
+    #     relative_rect=pygame.Rect((grid.x, HEIGHT - 35), (100, 20)),
+    #     text="Legend: ",
+    #     manager=UI_MANAGER,
+    #     object_id="#legend_lable")
+
     #set start and end default positions
     start = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
     end = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
@@ -120,10 +124,11 @@ def main() -> None:
     end_being_dragged = False
     algo_visualized = False
 
-
+    
     while running:
         time_delta = clock.tick(FPS)/1000.0
         draw(WIN, grid, UI_MANAGER, time_delta)
+        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -134,7 +139,7 @@ def main() -> None:
 
                         
             #if left mouse button clicked
-            if (pygame.mouse.get_pressed()[0] and mouse_on_the_grid() 
+            if (pygame.mouse.get_pressed()[0] and grid.mouse_on_the_grid() 
             and algo_menu.menu_states["closed"] == algo_menu.current_state and maze_menu.menu_states["closed"] == maze_menu.current_state):
                 mpos = pygame.mouse.get_pos()
                 row, col = grid.get_row_col_of_clicked_cell(mpos)
@@ -151,7 +156,7 @@ def main() -> None:
 
 
             #if right mouse button clicked
-            elif pygame.mouse.get_pressed()[2] and mouse_on_the_grid():
+            elif pygame.mouse.get_pressed()[2] and grid.mouse_on_the_grid():
                 mpos = pygame.mouse.get_pos()
                 row, col = grid.get_row_col_of_clicked_cell(mpos)
                 clicked_cell = grid[row][col]
@@ -159,7 +164,7 @@ def main() -> None:
                     clicked_cell.reset()
 
             #drag
-            if event.type == pygame.MOUSEMOTION and mouse_on_the_grid() and (start_being_dragged or end_being_dragged):
+            if event.type == pygame.MOUSEMOTION and grid.mouse_on_the_grid() and (start_being_dragged or end_being_dragged):
                 mpos = pygame.mouse.get_pos()
                 row, col = grid.get_row_col_of_clicked_cell(mpos)
                 if not grid[row][col].is_wall():
@@ -169,7 +174,7 @@ def main() -> None:
                         start.make_start()
                         grid.clear(start_end_except=True, barrier_except=True)
                         grid.update_neighbors_for_every_cell()
-                        run_current_algorithm(algo_menu, lambda: draw(WIN, grid, UI_MANAGER, time_delta), grid, start, end, animation=False)
+                        run_current_algorithm(algo_menu, draw, grid, start, end, animation=False)
                     
                     elif end_being_dragged and not grid[row][col].is_start() and algo_visualized:
                         end.reset()
@@ -177,7 +182,7 @@ def main() -> None:
                         end.make_end()
                         grid.clear(start_end_except=True, barrier_except=True)
                         grid.update_neighbors_for_every_cell()
-                        run_current_algorithm(algo_menu, lambda: draw(WIN, grid, UI_MANAGER, time_delta), grid, start, end, animation=False)
+                        run_current_algorithm(algo_menu, draw, grid, start, end, animation=False)
                    
                     elif start_being_dragged and not grid[row][col].is_end():
                         start.reset()
@@ -200,13 +205,13 @@ def main() -> None:
                 if event.ui_element == visualize_button:
                     grid.clear(start_end_except=True, barrier_except=True)
                     grid.update_neighbors_for_every_cell()
-                    run_current_algorithm(algo_menu, lambda: draw(WIN, grid, UI_MANAGER, time_delta), grid, start, end, ANIMATION)
+                    run_current_algorithm(algo_menu,  draw_lambda, grid, start, end, ANIMATION)
                     algo_visualized = True
 
                 #generate maze gui button
                 if event.ui_element == generate_button:
                     grid.clear(start_end_except=True)
-                    generate_current_maze(maze_menu, lambda: draw(WIN, grid, UI_MANAGER, time_delta), grid, start, end, ANIMATION)
+                    generate_current_maze(maze_menu,  draw_lambda, grid, start, end, ANIMATION)
                     algo_visualized = False
                  
                 #clear the grid gui
@@ -220,7 +225,7 @@ def main() -> None:
                 if event.key == pygame.K_SPACE and start and end:
                     grid.clear(start_end_except=True, barrier_except=True)
                     grid.update_neighbors_for_every_cell()
-                    run_current_algorithm(algo_menu, lambda: draw(WIN, grid, UI_MANAGER, time_delta), grid, start, end, ANIMATION)
+                    run_current_algorithm(algo_menu,  draw_lambda, grid, start, end, ANIMATION)
                     algo_visualized = True
 
                 #clear the grid keyboard
@@ -231,49 +236,63 @@ def main() -> None:
                 #generate maze keyboard
                 if event.key == pygame.K_m:
                     grid.clear(start_end_except=True)
-                    generate_current_maze(maze_menu, lambda: draw(WIN, grid, UI_MANAGER, time_delta), grid, start, end, ANIMATION)
+                    generate_current_maze(maze_menu,  draw_lambda, grid, start, end, ANIMATION)
                     algo_visualized = False
-
-
-
-                   
 
     pygame.quit()
 
 
-def run_current_algorithm(algo_menu, draw, grid, start, end, animation: bool) -> None:
-    if algo_menu.selected_option  == Algorithms.ASTAR.value:
-        algo.astar(draw, grid, start, end, animation)
 
-    elif algo_menu.selected_option  == Algorithms.DIJKSTRA.value:
+def run_current_algorithm(
+                        algo_menu: pygame_gui.elements.UIDropDownMenu, 
+                        draw: Callable, 
+                        grid: Grid, 
+                        start: Cell, 
+                        end: Cell, 
+                        animation: bool) -> None:
+
+    """Calls funcion that visulizes selected algorithm"""
+
+    if algo_menu.selected_option  == Algorithms.ASTAR:
+        algo.astar(draw, grid, start, end, animation) 
+
+    elif algo_menu.selected_option  == Algorithms.DIJKSTRA:
         algo.dijkstra(draw, grid, start, end, animation)
 
-    elif algo_menu.selected_option  == Algorithms.DFS.value:
+    elif algo_menu.selected_option == Algorithms.DFS:
         algo.dfs(draw, grid, start, end, animation)
 
-    elif algo_menu.selected_option  == Algorithms.BFS.value:
+    elif algo_menu.selected_option == Algorithms.BFS:
         algo.bfs(draw, grid, start, end, animation)
 
-    elif algo_menu.selected_option  == Algorithms.GBFS.value:
+    elif algo_menu.selected_option == Algorithms.GBFS:
         algo.gbfs(draw, grid, start, end, animation)
     
     else: 
         algo.astar(draw, grid, start, end, animation)
 
 
-def generate_current_maze(maze_menu, draw, grid, start, end, animation: bool) -> None:
-    if maze_menu.selected_option  == Mazes.RECDIV.value:
+def generate_current_maze(
+                        maze_menu: pygame_gui.elements.UIDropDownMenu, 
+                        draw: Callable, 
+                        grid: Grid, 
+                        start: Cell, 
+                        end: Cell, 
+                        animation: bool) -> None:
+
+    """Calls funcion that generates selected maze"""
+
+    if maze_menu.selected_option == Mazes.RECDIV:
         maze.recursive_division_maze_gen(draw, grid, animation)
 
-    elif maze_menu.selected_option  == Mazes.RANDOM_DFS.value:
+    elif maze_menu.selected_option == Mazes.RANDOM_DFS:
         maze.random_dfs_maze_gen(draw, (start, end), grid, animation)
 
-    elif maze_menu.selected_option  == Mazes.SPIRAL.value:
+    elif maze_menu.selected_option == Mazes.SPIRAL:
         maze.spiral_maze(draw, (start, end), grid, animation)
 
     else: 
         maze.recursive_division_maze_gen(draw, grid, animation)
-
         
 
 if __name__ == '__main__':

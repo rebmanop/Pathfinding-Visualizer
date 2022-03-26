@@ -22,7 +22,7 @@ class Cell:
 		self.total_rows, self.total_columns = grid_size
 		self.color = UNVISITED_COLOR
 		self.neighbors = []
-		self.neighbors_by_direction = {}
+		self.neighbor_by_direction = {}
 		self.x = grid_position[0] + self.col * self.width
 		self.y = grid_position[1] + self.row * self.width
 	
@@ -121,9 +121,9 @@ class Cell:
 			self.neighbor_by_direction["left"] = None
 	
 	@staticmethod
-	def init_cell_imgs(cell_dimensions: tuple[int, int])-> None:
-		Cell.POINT_A_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-a.png')).convert_alpha(), cell_dimensions)
-		Cell.POINT_B_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-b.png')).convert_alpha(), cell_dimensions)
+	def scale_cell_imgs(width, height)-> None:
+		Cell.POINT_A_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-a.png')).convert_alpha(), (width, height))
+		Cell.POINT_B_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-b.png')).convert_alpha(), (width, height))
 
 	
 
