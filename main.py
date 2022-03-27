@@ -78,6 +78,8 @@ def main() -> None:
     
     draw_lambda = lambda: draw(WIN, grid, UI_MANAGER, time_delta)
 
+
+    #gui elements initialization
     algo_menu = pygame_gui.elements.UIDropDownMenu(
         options_list=[algo for algo in Algorithms],
         starting_option=Algorithms.ASTAR, 
@@ -106,13 +108,12 @@ def main() -> None:
         text='CE',
         manager=UI_MANAGER)
 
-    # legend_lable_visited = pygame_gui.elements.UILabel(
+    # legend_lable = pygame_gui.elements.UILabel(
     #     relative_rect=pygame.Rect((grid.x, HEIGHT - 35), (100, 20)),
     #     text="Legend: ",
     #     manager=UI_MANAGER,
     #     object_id="#legend_lable")
 
-    #set start and end default positions
     start = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
     end = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
     start.make_start()
@@ -218,6 +219,13 @@ def main() -> None:
                 if event.ui_element == clear_button:
                     grid.clear(start_end_except=True)
                     algo_visualized = False
+                    
+                    start.reset()
+                    end.reset()
+                    start = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
+                    end = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
+                    start.make_start()
+                    end.make_end()
 
 
             #visualize algorithm keyboard
@@ -232,6 +240,14 @@ def main() -> None:
                 if event.key == pygame.K_c:
                     grid.clear(start_end_except=True)
                     algo_visualized = False
+                    
+                    start.reset()
+                    end.reset()
+                    start = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
+                    end = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
+                    start.make_start()
+                    end.make_end()
+
 
                 #generate maze keyboard
                 if event.key == pygame.K_m:
@@ -240,6 +256,16 @@ def main() -> None:
                     algo_visualized = False
 
     pygame.quit()
+
+
+# def set_default_position_for_points(start: list, end: list, grid: Grid):
+#     start[0].reset()
+#     end[0].reset()
+#     start[0] = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
+#     end[0] = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
+#     start[0].make_start()
+#     end[0].make_end()
+    
 
 
 
