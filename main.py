@@ -1,12 +1,14 @@
 import os
-from typing import Callable
 import maze
 import algo
+import cell
 import pygame
 import pygame_gui
-from grid import Grid, GREY
-from cell import Cell
+from typing import Callable
 from strenum import StrEnum
+from grid import Grid, GREY
+from legend_cell import LegendCell
+from pygame_gui.core import ObjectID
 
 
 # """1:1  cell size = 16px"""
@@ -16,7 +18,6 @@ from strenum import StrEnum
 # """21:9  cell size = 20px"""
 # GRID_SIZE = (36, 84) #(rows, columns)
 # GRID_DIMENSIONS = (1680, 720) #px
-
 
 
 WIDTH, HEIGHT = 1291, 765
@@ -38,18 +39,16 @@ pygame.display.set_caption("Pathfinding Visualizer")
 pygame.display.set_icon(LOGO)
 
 
-def draw(win, grid, UI_MANAGER, time_delta) -> None:
+def draw(win, grid, UI_MANAGER, time_delta, legend_cells) -> None:
     win.fill(BG_COLOR)
-    grid.draw_under_grid_cells()
+    grid.draw_under_grid_lines()
     grid.draw_grid_lines()
-    grid.draw_over_grid_cells()
+    grid.draw_over_grid_lines()
     UI_MANAGER.update(time_delta)
-    
-    #grid frame lines
-    pygame.draw.line(win, GREY, ((grid.x - 3, grid.y)), (grid.x - 3, grid.y + grid.height), width=5)
-    pygame.draw.line(win, GREY, ((grid.x + grid.width + 3, grid.y)), (grid.x + grid.width + 3, grid.y + grid.height), width=5)
-    pygame.draw.line(win, GREY, ((0, grid.y - 2)), (WIDTH, grid.y - 2), width=5)
-    pygame.draw.line(win, GREY, ((0, grid.y + grid.height + 2)), (WIDTH, grid.y + grid.height + 2), width=5)
+    grid.draw_grid_frame()
+
+    for legend_cell in legend_cells:
+        legend_cell.draw_legend_cell()
     
     UI_MANAGER.draw_ui(WIN)
     pygame.display.update()
@@ -61,12 +60,12 @@ class Algorithms(StrEnum):
     DFS = "Depth-first Search" 
     BFS ="Breadth-first Search" 
     GBFS = "Greedy Best-first Search"
+    BBFS = "Bidirectional BFS"
 
 class Mazes(StrEnum):
     RECDIV = "Recursive Division Maze"
     RANDOM_DFS = "Randomized Depth-first Search Maze"
     SPIRAL = "Spiral Maze"
- 
 
  
 def main() -> None:
@@ -74,9 +73,9 @@ def main() -> None:
     grid = Grid(WIN, GRID_SIZE, (GRID_WIDTH, GRID_HEIGHT), GRID_POSITION)
     
     #scales images to correct cell size
-    Cell.scale_cell_imgs(grid.gap, grid.gap)
+    cell.Cell.scale_cell_imgs(grid.gap, grid.gap)
     
-    draw_lambda = lambda: draw(WIN, grid, UI_MANAGER, time_delta)
+    draw_lambda = lambda: draw(WIN, grid, UI_MANAGER, time_delta, legend_cells)
 
 
     #gui elements initialization
@@ -108,11 +107,45 @@ def main() -> None:
         text='CE',
         manager=UI_MANAGER)
 
-    # legend_lable = pygame_gui.elements.UILabel(
-    #     relative_rect=pygame.Rect((grid.x, HEIGHT - 35), (100, 20)),
-    #     text="Legend: ",
-    #     manager=UI_MANAGER,
-    #     object_id="#legend_lable")
+    unvisited_cell_lable = pygame_gui.elements.UILabel(
+         relative_rect=pygame.Rect((grid.x + grid.gap, HEIGHT - 35), (130, grid.gap)),
+         text="-unvisited cell",
+         manager=UI_MANAGER,
+         object_id=ObjectID(class_id="@legend_cell_lables"))
+
+    visited_cell_lable = pygame_gui.elements.UILabel(
+         relative_rect=pygame.Rect((grid.x + 200 + grid.gap, HEIGHT - 35), (115, grid.gap)),
+         text="-visited cell",
+         manager=UI_MANAGER,
+         object_id=ObjectID(class_id="@legend_cell_lables"))
+
+    open_cell_lable = pygame_gui.elements.UILabel(
+         relative_rect=pygame.Rect((grid.x + 400 + grid.gap, HEIGHT - 35), (90, grid.gap)),
+         text="-open cell",
+         manager=UI_MANAGER,
+         object_id=ObjectID(class_id="@legend_cell_lables"))
+
+    path_cell_lable = pygame_gui.elements.UILabel(
+         relative_rect=pygame.Rect((grid.x + 600 + grid.gap, HEIGHT - 35), (90, grid.gap)),
+         text="-path cell",
+         manager=UI_MANAGER,
+         object_id=ObjectID(class_id="@legend_cell_lables"))
+
+    wall_cell_lable = pygame_gui.elements.UILabel(
+         relative_rect=pygame.Rect((grid.x + 800 + grid.gap, HEIGHT - 35), (90, grid.gap)),
+         text="-wall cell",
+         manager=UI_MANAGER,
+         object_id=ObjectID(class_id="@legend_cell_lables"))
+
+    legend_cells = [
+        LegendCell(WIN, grid.x, HEIGHT - 35, cell.UNVISITED_COLOR, GREY, grid),
+        LegendCell(WIN, grid.x + 200, HEIGHT - 35, cell.VISITED_COLOR, GREY, grid),
+        LegendCell(WIN, grid.x + 400, HEIGHT - 35, cell.OPEN_COLOR, GREY, grid),
+        LegendCell(WIN, grid.x + 600, HEIGHT - 35, cell.PATH_COLOR, GREY, grid),
+        LegendCell(WIN, grid.x + 800, HEIGHT - 35, cell.WALL_COLOR, GREY, grid)]
+
+    
+
 
     start = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
     end = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
@@ -128,7 +161,7 @@ def main() -> None:
     
     while running:
         time_delta = clock.tick(FPS)/1000.0
-        draw(WIN, grid, UI_MANAGER, time_delta)
+        draw(WIN, grid, UI_MANAGER, time_delta, legend_cells)
         
 
         for event in pygame.event.get():
@@ -258,26 +291,15 @@ def main() -> None:
     pygame.quit()
 
 
-# def set_default_position_for_points(start: list, end: list, grid: Grid):
-#     start[0].reset()
-#     end[0].reset()
-#     start[0] = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
-#     end[0] = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
-#     start[0].make_start()
-#     end[0].make_end()
-    
-
-
-
 def run_current_algorithm(
                         algo_menu: pygame_gui.elements.UIDropDownMenu, 
                         draw: Callable, 
                         grid: Grid, 
-                        start: Cell, 
-                        end: Cell, 
+                        start: cell.Cell, 
+                        end: cell.Cell, 
                         animation: bool) -> None:
 
-    """Calls funcion that visulizes selected algorithm"""
+    """Calls function that visulizes selected algorithm"""
 
     if algo_menu.selected_option  == Algorithms.ASTAR:
         algo.astar(draw, grid, start, end, animation) 
@@ -293,6 +315,9 @@ def run_current_algorithm(
 
     elif algo_menu.selected_option == Algorithms.GBFS:
         algo.gbfs(draw, grid, start, end, animation)
+
+    elif algo_menu.selected_option == Algorithms.BBFS:
+        algo.bidirectional_bfs(draw, grid, start, end, animation)
     
     else: 
         algo.astar(draw, grid, start, end, animation)
@@ -302,11 +327,11 @@ def generate_current_maze(
                         maze_menu: pygame_gui.elements.UIDropDownMenu, 
                         draw: Callable, 
                         grid: Grid, 
-                        start: Cell, 
-                        end: Cell, 
+                        start: cell.Cell, 
+                        end: cell.Cell, 
                         animation: bool) -> None:
 
-    """Calls funcion that generates selected maze"""
+    """Calls function that generates selected maze"""
 
     if maze_menu.selected_option == Mazes.RECDIV:
         maze.recursive_division_maze_gen(draw, grid, animation)

@@ -34,17 +34,11 @@
          }
     },
 
-    "#legend_lable":
+    "@legend_cell_lables":
     {
         "colours":
          {
             "normal_text":"#45494e"
-         },
-        
-        "font_info_dict":
-         {
-            "size": "25"
          }
-
     }
  }

@@ -1,9 +1,10 @@
+from cell import Cell
 from grid import Grid
 from queue import PriorityQueue, Queue
 from utils import aborted, Heuristic
 
 
-def reconstruct_path(came_from, current) -> list: 
+def reconstruct_path(came_from, current) -> list[Cell]: 
     path = []
     while current in came_from:
         current = came_from[current]
@@ -13,7 +14,19 @@ def reconstruct_path(came_from, current) -> list:
     path.reverse() 
 
     #pop start cell from the path list, so animation wouldn't redraw it 
-    path.pop(0) 
+    if len(path) != 0:
+        path.pop(0) 
+    
+    return path
+
+
+def reconstruct_path_bbfs(came_from, current) -> list[Cell]: 
+    path = [current]
+    while current in came_from:
+        current = came_from[current]
+        path.append(current)
+
+    path.pop() 
     
     return path
 
@@ -128,6 +141,7 @@ def dijkstra(draw, grid, start, end, animation: bool) -> None:
             current.visit()
 
 
+
 def dfs(draw, grid, start, end, animation) -> None:
     marked = {cell: False for row in grid.raw_grid for cell in row}
     stack = [start]
@@ -191,6 +205,54 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
             current.visit()
 
 
+def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:
+    Qf = Queue()
+    Qb = Queue()
+    explored_forward = {start}
+    explored_backwards = {end}
+    Qf.put(start)
+    Qb.put(end)
+    came_from_forward = {}
+    came_from_backwards = {}
+        
+    while not Qf.empty() and not Qb.empty():
+        if aborted():
+            return
+        
+        u = Qf.get()
+        v = Qb.get()
+
+        if u in explored_backwards:
+            path: list[Cell] = reconstruct_path(came_from_forward, u) + reconstruct_path_bbfs(came_from_backwards, u)
+            animate_path(draw, path, grid, animation)
+            return
+        
+        for neighbor in u.neighbors:
+            if neighbor not in explored_forward:
+                explored_forward.add(neighbor)
+                Qf.put(neighbor)
+                came_from_forward[neighbor] = u
+                if neighbor != end and neighbor != start:
+                    neighbor.make_open()
+
+        for neighbor in v.neighbors:
+            if neighbor not in explored_backwards:
+                explored_backwards.add(neighbor)
+                Qb.put(neighbor)
+                came_from_backwards[neighbor] = v
+                if neighbor != end and neighbor != start:
+                    neighbor.make_open()
+                
+        if animation:
+            draw()
+
+        if u != start and u != end:
+            u.visit()
+        
+        if v != end and v != start:
+            v.visit()
+            
+
 def gbfs(draw, grid: Grid, start, end, animation: bool):
     queue = PriorityQueue()
     visited = {start}
@@ -211,8 +273,7 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
             if neighbor not in visited:
                 count += 1
                 if neighbor.is_end():
-                    path = []
-                    path.append(current_cell)
+                    path = [current_cell]
                     while current_cell in came_from:
                         current_cell = came_from[current_cell]
                         path.append(current_cell)
@@ -231,5 +292,6 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
           
         if animation:
             draw()
+
 
 

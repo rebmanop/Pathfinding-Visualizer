@@ -47,13 +47,13 @@ class Grid:
                 cell.update_neighbors_by_direction(self.raw_grid)
 
 
-    def draw_under_grid_cells(self) -> None:
+    def draw_under_grid_lines(self) -> None:
         for row in self.raw_grid:
             for cell in row:
                 if not cell.is_wall():
                     cell.draw(self.win)
 
-    def draw_over_grid_cells(self) -> None:
+    def draw_over_grid_lines(self) -> None:
         for row in self.raw_grid:
             for cell in row:
                 if cell.is_wall(): 
@@ -93,6 +93,11 @@ class Grid:
                         cell.reset()
 
 
+    def draw_grid_frame(self) -> None:
+        pygame.draw.line(self.win, GREY, ((self.x - 3, self.y)), (self.x - 3, self.y + self.height), width=5)
+        pygame.draw.line(self.win, GREY, ((self.x + self.width + 3, self.y)), (self.x + self.width + 3, self.y + self.height), width=5)
+        pygame.draw.line(self.win, GREY, ((0,self.y - 2)), (self.win.get_width(), self.y - 2), width=5)
+        pygame.draw.line(self.win, GREY, ((0, self.y + self.height + 2)), (self.win.get_width(), self.y + self.height + 2), width=5)
 
 
     def make_all_cells_wall(self) -> None:
