@@ -7,7 +7,7 @@ VISITED_COLOR = (64, 227, 206) # green
 OPEN_COLOR = (197, 114, 255)# purple
 WALL_COLOR = (30, 30, 30) # black
 UNVISITED_COLOR = (255, 255, 255) # white
-
+GREY = (130, 127, 125)
   
 
 class Cell:
@@ -75,12 +75,19 @@ class Cell:
 		self.color = PATH_COLOR
 
 
-	def draw(self, win):
+	def draw(self, win, for_animation=False):
 		if self.is_start() or self.is_end():
 			pygame.draw.rect(win, UNVISITED_COLOR, (self.x, self.y, self.width, self.width))
 			win.blit(self.color, (self.x, self.y))	
 		else:
 			pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+
+		if for_animation:
+			pygame.draw.line(win, GREY, (self.x, self.y), (self.x,  self.y + self.width))
+			pygame.draw.line(win, GREY, (self.x + self.width, self.y), (self.x + self.width, self.y + self.width))
+			pygame.draw.line(win, GREY, (self.x, self.y), (self.x + self.width, self.y))
+			pygame.draw.line(win, GREY, (self.x, self.y + self.width), (self.x + self.width,  self.y + self.width))
+
 
 
 	def update_neighbors(self, grid):

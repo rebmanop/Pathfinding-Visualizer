@@ -1,7 +1,9 @@
+from operator import ne
 from cell import Cell
 from grid import Grid
 from queue import PriorityQueue, Queue
 from utils import aborted, Heuristic
+import pygame
 
 
 def reconstruct_path(came_from, current) -> list[Cell]: 
@@ -178,8 +180,11 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
     explored = {start}
     queue.put(start)
     came_from = {}
-        
+    clock = pygame.time.Clock()
+    draw()
     while not queue.empty():
+        clock.tick(600)
+        
         if aborted():
             return
         
@@ -197,12 +202,21 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
                 came_from[neighbor] = current
                 if neighbor != end:
                     neighbor.make_open()
+                    neighbor.draw(grid.win, True)
+
                 
-        if animation:
-            draw()
+        # if animation:
+        #     draw()
 
         if current != start:
             current.visit()
+            current.draw(grid.win, True)
+
+        
+        pygame.display.update()
+
+
+        
 
 
 def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:

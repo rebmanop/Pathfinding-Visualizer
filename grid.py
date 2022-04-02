@@ -35,6 +35,9 @@ class Grid:
             for j in range(self.total_columns + 1):
                 pygame.draw.line(self.win, self.line_color, (self.x + j * self.gap, self.y), (self.x + j * self.gap, self.y + self.height))
 
+ 
+
+
 
     def update_neighbors_for_every_cell(self) -> None:
         for row in self.raw_grid:

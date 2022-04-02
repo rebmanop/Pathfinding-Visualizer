@@ -13,7 +13,7 @@ class LegendCell:
 
     def draw_legend_cell(self):
         pygame.draw.rect(self.win, self.color, (self.x, self.y, self.width, self.height))
-        pygame.draw.line(self.win, self.frame_color, (self.x, self.y), (self.x,  + self.y + self.height))
+        pygame.draw.line(self.win, self.frame_color, (self.x, self.y), (self.x,  self.y + self.height))
         pygame.draw.line(self.win, self.frame_color, (self.x + self.width, self.y), (self.x + self.width, self.y + self.height))
         pygame.draw.line(self.win, self.frame_color, (self.x, self.y), (self.x + self.width, self.y))
         pygame.draw.line(self.win, self.frame_color, (self.x, self.y + self.height), (self.x + self.width,  self.y + self.height))

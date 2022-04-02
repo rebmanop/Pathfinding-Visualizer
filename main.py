@@ -31,7 +31,7 @@ BG_COLOR = (64, 227, 206)#green
 ANIMATION = True
 
 pygame.init()
-FPS = 240
+FPS = 30
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 UI_MANAGER = pygame_gui.UIManager((WIDTH, HEIGHT), "gui_theme.json")
 LOGO = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'logo.png')).convert_alpha(), (35, 35))
@@ -52,6 +52,19 @@ def draw(win, grid, UI_MANAGER, time_delta, legend_cells) -> None:
     
     UI_MANAGER.draw_ui(WIN)
     pygame.display.update()
+
+# def redraw_single_cell(win, grid, UI_MANAGER, time_delta, legend_cells, cell):
+#     win.fill(BG_COLOR)
+#     cell.draw(win)
+#     grid.draw_grid_lines()
+#     UI_MANAGER.update(time_delta)
+#     grid.draw_grid_frame()
+
+#     for legend_cell in legend_cells:
+#         legend_cell.draw_legend_cell()
+    
+#     UI_MANAGER.draw_ui(WIN)
+#     pygame.display.update()
 
 
 class Algorithms(StrEnum):
@@ -208,7 +221,7 @@ def main() -> None:
                         start.make_start()
                         grid.clear(start_end_except=True, barrier_except=True)
                         grid.update_neighbors_for_every_cell()
-                        run_current_algorithm(algo_menu, draw, grid, start, end, animation=False)
+                        run_current_algorithm(algo_menu, draw_lambda, grid, start, end, animation=False)
                     
                     elif end_being_dragged and not grid[row][col].is_start() and algo_visualized:
                         end.reset()
@@ -216,7 +229,7 @@ def main() -> None:
                         end.make_end()
                         grid.clear(start_end_except=True, barrier_except=True)
                         grid.update_neighbors_for_every_cell()
-                        run_current_algorithm(algo_menu, draw, grid, start, end, animation=False)
+                        run_current_algorithm(algo_menu, draw_lambda, grid, start, end, animation=False)
                    
                     elif start_being_dragged and not grid[row][col].is_end():
                         start.reset()
