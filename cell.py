@@ -75,14 +75,14 @@ class Cell:
 		self.color = PATH_COLOR
 
 
-	def draw(self, win, for_animation=False):
+	def draw(self, win, animation=False):
 		if self.is_start() or self.is_end():
 			pygame.draw.rect(win, UNVISITED_COLOR, (self.x, self.y, self.width, self.width))
 			win.blit(self.color, (self.x, self.y))	
 		else:
 			pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
 
-		if for_animation:
+		if animation:
 			pygame.draw.line(win, GREY, (self.x, self.y), (self.x,  self.y + self.width))
 			pygame.draw.line(win, GREY, (self.x + self.width, self.y), (self.x + self.width, self.y + self.width))
 			pygame.draw.line(win, GREY, (self.x, self.y), (self.x + self.width, self.y))

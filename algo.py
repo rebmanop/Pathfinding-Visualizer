@@ -1,12 +1,13 @@
-from operator import ne
+import pygame
 from cell import Cell
 from grid import Grid
-from queue import PriorityQueue, Queue
 from utils import aborted, Heuristic
-import pygame
+from queue import PriorityQueue, Queue
+
+PATH_ANIMATION_SPEED = 100
 
 
-def reconstruct_path(came_from, current) -> list[Cell]: 
+def reconstruct_path(came_from:dict, current:Cell) -> list[Cell]: 
     path = []
     while current in came_from:
         current = came_from[current]
@@ -22,7 +23,7 @@ def reconstruct_path(came_from, current) -> list[Cell]:
     return path
 
 
-def reconstruct_path_bbfs(came_from, current) -> list[Cell]: 
+def reconstruct_path_bbfs(came_from:dict, current:Cell) -> list[Cell]: 
     path = [current]
     while current in came_from:
         current = came_from[current]
@@ -33,28 +34,29 @@ def reconstruct_path_bbfs(came_from, current) -> list[Cell]:
     return path
 
 
-def animate_path(draw, path, grid, animation: bool) -> None:
-    reset_opened_cells(draw, grid, animation)
-
+def animate_path(win:pygame.Surface, path:list[Cell], grid:Grid, animation:bool) -> None:
+    reset_opened_cells(grid, win, animation)
+    clock = pygame.time.Clock()
     for cell in path:
         if aborted():
             return
         cell.make_path()
         if animation:
-            draw()
-        #pygame.time.wait(10)
+            cell.draw(win, animation)
+            pygame.display.update()
+            clock.tick(PATH_ANIMATION_SPEED)
+            
 
 
-def reset_opened_cells(draw, grid, animation: bool):
+def reset_opened_cells(grid:Grid, win:pygame.Surface, animation:bool):
     for row in grid.raw_grid: 
         for cell in row:
             if cell.is_open():
                 cell.reset()
-                # if animation:
-                #     draw()
+                cell.draw(win, animation)
 
-
-def astar(draw, grid, start, end, animation: bool) -> None:
+    
+def astar(win:pygame.Surface, grid:Grid, start:Cell, end:Cell, animation: bool, speed: int = 0) -> None:
     open_set = PriorityQueue()
     count = 0
     open_set.put((0, count, start))
@@ -65,8 +67,10 @@ def astar(draw, grid, start, end, animation: bool) -> None:
     f_score[start] = Heuristic.manhattan(start.get_pos(), end.get_pos())
 
     open_set_hash = {start}
+    clock = pygame.time.Clock()
 
     while not open_set.empty():
+        cells_to_redraw = []
         if aborted():
             return
 
@@ -75,7 +79,7 @@ def astar(draw, grid, start, end, animation: bool) -> None:
         
         if current == end:
             path = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid, animation)
+            animate_path(win, path, grid, animation)
             return
 
         for neighbor in current.neighbors:
@@ -92,15 +96,21 @@ def astar(draw, grid, start, end, animation: bool) -> None:
                     open_set_hash.add(neighbor)
                     if neighbor != end:
                         neighbor.make_open()
-
-        if animation:
-            draw()
+                        cells_to_redraw.append(neighbor)
 
         if current != start:
             current.visit()
+            cells_to_redraw.append(current)
+
+        if animation:
+            for cell in cells_to_redraw:
+                cell.draw(win, animation)
+            pygame.display.update()
+            clock.tick(speed)
+
 
    
-def dijkstra(draw, grid, start, end, animation: bool) -> None:
+def dijkstra(win:pygame.Surface, grid:Grid, start:Cell, end:Cell, animation:bool, speed:int = 0) -> None:
     open_set = PriorityQueue()
     count = 0
     open_set.put((0, count, start))
@@ -108,8 +118,11 @@ def dijkstra(draw, grid, start, end, animation: bool) -> None:
     distance = {cell: float("inf") for row in grid.raw_grid for cell in row}
     distance[start] = 0
     came_from = {}
+    clock = pygame.time.Clock()
 
     while not open_set.empty():
+        cells_to_redraw = []
+        
         if aborted():
             return
 
@@ -120,7 +133,7 @@ def dijkstra(draw, grid, start, end, animation: bool) -> None:
         
         if current == end:
             path = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid, animation)
+            animate_path(win, path, grid, animation)
             return
         
 
@@ -135,20 +148,28 @@ def dijkstra(draw, grid, start, end, animation: bool) -> None:
                     open_set_hash.add(neighbor)
                     if neighbor != end:
                         neighbor.make_open()
-        
-        if animation:
-            draw()
+                        cells_to_redraw.append(neighbor)
 
         if current != start:
             current.visit()
+            cells_to_redraw.append(current)
+
+
+        if animation:
+            for cell in cells_to_redraw:
+                cell.draw(win, animation)
+            pygame.display.update()
+            clock.tick(speed)
 
 
 
-def dfs(draw, grid, start, end, animation) -> None:
+def dfs(win:pygame.Surface, grid:Grid, start:Cell, end:Cell, animation:bool, speed:int = 0) -> None:
     marked = {cell: False for row in grid.raw_grid for cell in row}
     stack = [start]
     came_from = {}
+    clock = pygame.time.Clock()
     while len(stack) > 0:
+
         if aborted():
             return
 
@@ -156,7 +177,7 @@ def dfs(draw, grid, start, end, animation) -> None:
         
         if current == end:
             path = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid, animation)
+            animate_path(win, path, grid, animation)
             return
 
         if not marked[current]:
@@ -165,26 +186,32 @@ def dfs(draw, grid, start, end, animation) -> None:
                 if not marked[neighbor]:
                     stack.append(neighbor)
                     came_from[neighbor] = current
-                    if current != start:
+                    if current != start and not current.is_visited() and animation:
                         current.make_open()
-
-        if animation and not current.is_visited():
-            draw()
+                        current.draw(win, animation)
+                        pygame.display.update()
+                        
+        
+        
+        if current != start and not current.is_visited() and animation:
+            current.visit()
+            current.draw(win, animation)
+            pygame.display.update()
+            clock.tick(speed)
 
         if current != start:
-                current.visit()
+            current.visit()
+          
 
-
-def bfs(draw, grid, start, end, animation: bool)  -> None:
+def bfs(win:pygame.Surface, grid:Grid, start:Cell, end:Cell, animation:bool, speed:int = 0)  -> None:
     queue = Queue()
     explored = {start}
     queue.put(start)
     came_from = {}
     clock = pygame.time.Clock()
-    draw()
     while not queue.empty():
-        clock.tick(600)
-        
+        cells_to_redraw = []
+
         if aborted():
             return
         
@@ -192,7 +219,7 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
         
         if current == end:
             path: list = reconstruct_path(came_from, current)
-            animate_path(draw, path, grid, animation)
+            animate_path(win, path, grid, animation)
             return
         
         for neighbor in current.neighbors:
@@ -202,24 +229,21 @@ def bfs(draw, grid, start, end, animation: bool)  -> None:
                 came_from[neighbor] = current
                 if neighbor != end:
                     neighbor.make_open()
-                    neighbor.draw(grid.win, True)
+                    cells_to_redraw.append(neighbor)
 
-                
-        # if animation:
-        #     draw()
 
         if current != start:
             current.visit()
-            current.draw(grid.win, True)
-
+            cells_to_redraw.append(current)
         
-        pygame.display.update()
+        if animation:
+            for cell in cells_to_redraw:
+                cell.draw(win, animation)
+            pygame.display.update()
+            clock.tick(speed)
 
 
-        
-
-
-def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:
+def bidirectional_bfs(win:pygame.Surface, grid:Grid, start:Cell, end:Cell, animation:bool, speed:int = 0)  -> None:
     Qf = Queue()
     Qb = Queue()
     explored_forward = {start}
@@ -228,8 +252,11 @@ def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:
     Qb.put(end)
     came_from_forward = {}
     came_from_backwards = {}
+    clock = pygame.time.Clock()
         
     while not Qf.empty() and not Qb.empty():
+        
+        cells_to_redraw = []
         if aborted():
             return
         
@@ -238,7 +265,7 @@ def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:
 
         if u in explored_backwards:
             path: list[Cell] = reconstruct_path(came_from_forward, u) + reconstruct_path_bbfs(came_from_backwards, u)
-            animate_path(draw, path, grid, animation)
+            animate_path(win, path, grid, animation)
             return
         
         for neighbor in u.neighbors:
@@ -248,6 +275,7 @@ def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:
                 came_from_forward[neighbor] = u
                 if neighbor != end and neighbor != start:
                     neighbor.make_open()
+                    cells_to_redraw.append(neighbor)
 
         for neighbor in v.neighbors:
             if neighbor not in explored_backwards:
@@ -256,25 +284,35 @@ def bidirectional_bfs(draw, grid, start, end, animation: bool)  -> None:
                 came_from_backwards[neighbor] = v
                 if neighbor != end and neighbor != start:
                     neighbor.make_open()
+                    cells_to_redraw.append(neighbor)
                 
-        if animation:
-            draw()
 
         if u != start and u != end:
             u.visit()
+            cells_to_redraw.append(u)
         
         if v != end and v != start:
             v.visit()
+            cells_to_redraw.append(v)
+
+
+        if animation:
+            for cell in cells_to_redraw:
+                cell.draw(win, animation)
+            pygame.display.update()
+            clock.tick(speed)
             
 
-def gbfs(draw, grid: Grid, start, end, animation: bool):
+def gbfs(win:pygame.Surface, grid:Grid, start:Cell, end:Cell, animation:bool, speed:int = 0):
     queue = PriorityQueue()
     visited = {start}
     came_from = {}
     count = 0
     queue.put((Heuristic.manhattan(start.get_pos(), end.get_pos()), count,start))
-
+    clock = pygame.time.Clock()
     while not queue.empty():
+        cells_to_redraw = []
+
         if aborted():
             return
 
@@ -282,6 +320,7 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
 
         if current_cell != start:
             current_cell.visit()
+            cells_to_redraw.append(current_cell)
         
         for neighbor in current_cell.neighbors:
             if neighbor not in visited:
@@ -293,7 +332,7 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
                         path.append(current_cell)
                     path.reverse() 
                     path.pop(0) 
-                    animate_path(draw, path, grid, animation)
+                    animate_path(win, path, grid, animation)
                     return
 
                 else:
@@ -302,10 +341,13 @@ def gbfs(draw, grid: Grid, start, end, animation: bool):
                     queue.put((Heuristic.manhattan(neighbor.get_pos(), end.get_pos()), count, neighbor))
                     if  neighbor != start:
                         neighbor.make_open()
+                        cells_to_redraw.append(neighbor)
 
-          
         if animation:
-            draw()
+            for cell in cells_to_redraw:
+                cell.draw(win, animation)
+            pygame.display.update()
+            clock.tick(speed)
 
 
 

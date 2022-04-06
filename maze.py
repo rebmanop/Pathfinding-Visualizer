@@ -13,14 +13,15 @@ class RoomCoordinates:
         self.right = grid.total_columns - 2 
 
 
-def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:    
+def random_dfs_maze_gen(win:pygame.Surface, grid:Grid, animation:bool, speed:int = 0) -> None:    
     grid.update_neighbors_for_every_cell()
-    grid.make_all_cells_wall()
-    points[0].make_start()
-    points[1].make_end()
-    start = grid[0][0]
-    visited_set = {start}
-    stack = [start]
+    grid.make_all_cells_wall(start_end_except=True)
+    grid.draw_over_grid_lines()
+    pygame.display.update()
+    start_maze_cell = grid[0][0]
+    visited_set = {start_maze_cell}
+    stack = [start_maze_cell]
+    clock = pygame.time.Clock()
 
     while len(stack) > 0:
         if aborted():
@@ -42,19 +43,22 @@ def random_dfs_maze_gen(draw, points: tuple, grid, animation) -> None:
             stack.append(neighbors[random_index])
             if not current.is_unvisited() and not current.is_start() and not current.is_end():
                 current.reset()
+                if animation:
+                    current.draw(win, animation)
+                    pygame.display.update()
+                    clock.tick(speed)
 
-        if animation:
-            draw()
+
         
 
-def recursive_division_maze_gen(draw, grid: Grid, animation: bool) -> None:
+def recursive_division_maze_gen(win:pygame.Surface, grid:Grid, animation:bool, speed:int = 0) -> None:
     grid.update_neighbors_for_every_cell()
     coordinates = RoomCoordinates(grid)
-    draw_outside_border(draw, grid, animation)
-    recursive_division(draw, grid, coordinates, animation)
+    draw_outside_border(win, grid, animation, speed)
+    recursive_division(win, grid, coordinates, animation, speed)
 
 
-def recursive_division(draw, grid: Grid, coordinates: RoomCoordinates, animation: bool) -> None:
+def recursive_division(win:pygame.Surface, grid:Grid, coordinates:RoomCoordinates, animation:bool, speed:int = 0) -> None:
 
     if (coordinates.bottom - coordinates.top) < (coordinates.right - coordinates.left):
         horizontal = False
@@ -79,27 +83,27 @@ def recursive_division(draw, grid: Grid, coordinates: RoomCoordinates, animation
         wall_idx = available_idxes[len(available_idxes) // 2 ]
 
 
-    build_wall(draw, grid, horizontal, wall_idx, coordinates, animation)
-    carve_path(draw, grid, horizontal, wall_idx, coordinates, animation)
+    build_wall(win, grid, horizontal, wall_idx, coordinates, animation, speed)
+    carve_path(win, grid, horizontal, wall_idx, coordinates, animation)
     
     if horizontal:
         coordinates_copy = deepcopy(coordinates)
         coordinates.top = wall_idx + 1
-        recursive_division(draw, grid, coordinates, animation)
+        recursive_division(win, grid, coordinates, animation, speed)
 
         coordinates_copy.bottom = wall_idx - 1 
-        recursive_division(draw, grid, coordinates_copy, animation)
+        recursive_division(win, grid, coordinates_copy, animation, speed)
 
     else:
         coordinates_copy = deepcopy(coordinates)
         coordinates.left = wall_idx + 1 
-        recursive_division(draw, grid, coordinates, animation)
+        recursive_division(win, grid, coordinates, animation, speed)
 
         coordinates_copy.right = wall_idx - 1
-        recursive_division(draw, grid, coordinates_copy, animation)
+        recursive_division(win, grid, coordinates_copy, animation, speed)
 
 
-def get_available_indxes(grid: Grid, coordinates: RoomCoordinates, horizontal: bool) -> list:
+def get_available_indxes(grid:Grid, coordinates:RoomCoordinates, horizontal:bool) -> list[int]:
     """returns list of valid wall indexes, so future wall wouldn't block exit out of the room 
         and wouldn't spawn rigth next to existing wall"""
     
@@ -117,7 +121,9 @@ def get_available_indxes(grid: Grid, coordinates: RoomCoordinates, horizontal: b
     return available_idxes
     
  
-def build_wall(draw, grid: Grid, horizontal: bool, index: int, coordinates: RoomCoordinates, animation: bool) -> None:
+def build_wall(win:pygame.Surface, grid:Grid, horizontal:bool, index:int, coordinates:RoomCoordinates, animation:bool, speed:int = 0) -> None:
+    clock = pygame.time.Clock()
+    
     if horizontal:
         for j in range(coordinates.left, coordinates.right + 1):
             if not grid[index][j].is_start() and not grid[index][j].is_end():
@@ -125,7 +131,9 @@ def build_wall(draw, grid: Grid, horizontal: bool, index: int, coordinates: Room
             if aborted():
                 return
             if animation:
-                draw()
+                grid[index][j].draw(win)
+                pygame.display.update()
+                clock.tick(speed)
     
     else:
         for i in range(coordinates.top, coordinates.bottom + 1):
@@ -134,37 +142,51 @@ def build_wall(draw, grid: Grid, horizontal: bool, index: int, coordinates: Room
             if aborted():
                 return
             if animation:
-                draw()
+                grid[i][index].draw(win)
+                pygame.display.update()
+                clock.tick(speed)
             
 
-def carve_path(draw, grid: Grid, horizontal: bool, index: int, coordinates: RoomCoordinates, animation: bool) -> None:
+def carve_path(win:pygame.Surface, grid:Grid, horizontal:bool, index:int, coordinates:RoomCoordinates, animation:bool) -> None:
     if horizontal :    
         rand_idx = random.randint(coordinates.left, coordinates.right)
         if not grid[index][rand_idx].is_start() and not grid[index][rand_idx].is_end():
             grid[index][rand_idx].reset()
         if animation:
-            draw()
+            grid[index][rand_idx].draw(win, animation)
+            pygame.display.update()
+           
 
     else:
         rand_idx = random.randint(coordinates.top, coordinates.bottom)
         if not grid[rand_idx][index].is_start() and not grid[rand_idx][index].is_end():
             grid[rand_idx][index].reset()
         if animation:
-            draw()
+            grid[rand_idx][index].draw(win, animation)
+            pygame.display.update()
+        
+
  
 
-def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
+def draw_outside_border(win:pygame.Surface, grid:Grid, animation:bool, speed:int = 0) -> None:
+    clock = pygame.time.Clock()
+    
     for cell in grid[0]:  # top border
         if not cell.is_start() and not cell.is_end():
             cell.make_wall()
         if animation:
-            draw()
+            cell.draw(win)
+            pygame.display.update()
+            clock.tick(speed)
+            
 
     for i in range(grid.total_rows): #right border
         if not grid[i][grid.total_columns - 1].is_start() and not grid[i][grid.total_columns - 1].is_end():
             grid[i][grid.total_columns - 1].make_wall() 
         if animation:
-            draw()
+            grid[i][grid.total_columns - 1].draw(win)
+            pygame.display.update()
+            clock.tick(speed)
 
     bottom_border = grid[grid.total_rows - 1][:] #bottom border
     bottom_border.reverse()
@@ -172,7 +194,9 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
         if not cell.is_start() and not cell.is_end():
             cell.make_wall()
         if animation:
-            draw()
+            cell.draw(win)
+            pygame.display.update()
+            clock.tick(speed)
 
     left_border = [grid[i][0] for i in range(grid.total_rows)] #left border
     left_border.reverse()
@@ -180,18 +204,24 @@ def draw_outside_border(draw, grid: Grid, animation: bool) -> None:
         if not cell.is_start() and not cell.is_end():
             cell.make_wall()
         if animation:
-            draw()     
+            cell.draw(win)
+            pygame.display.update()
+            clock.tick(speed)     
 
 
-def spiral_maze(draw, points: tuple, grid: Grid, animation: bool) -> None:
+def spiral_maze(win:pygame.Surface, grid:Grid, animation:bool, speed:int = 0) -> None:
     grid.update_neighbors_by_direction_for_every_cell()
-    grid.make_all_cells_wall()
-    points[0].make_start()
-    points[1].make_end()
+    grid.make_all_cells_wall(start_end_except=True)
+    grid.draw_over_grid_lines()
     current = grid[0][0]
     directions = cycle(["right", "down", "left", "up"])
     if not current.is_start() and not current.is_end():
         current.reset()
+    if animation:
+        current.draw(win, animation)
+        pygame.display.update()
+
+    clock = pygame.time.Clock()
     
     while True:
         direction = next(directions)
@@ -215,7 +245,9 @@ def spiral_maze(draw, points: tuple, grid: Grid, animation: bool) -> None:
             neighbor = current.neighbor_by_direction[direction]
 
             if animation:
-                draw()
+                current.draw(win, animation)
+                pygame.display.update()
+                clock.tick(speed)
 
             if (neighbor.neighbor_by_direction[direction] != None 
                 and neighbor.neighbor_by_direction[direction].is_unvisited()): 
@@ -228,6 +260,15 @@ def spiral_maze(draw, points: tuple, grid: Grid, animation: bool) -> None:
         j = random.randrange(1, grid.total_columns - 1)
         if not grid[i][j].is_start() and not grid[i][j].is_end():
             grid[random.randrange(1, grid.total_rows - 1)][random.randrange(1, grid.total_columns - 1)].reset()
+
+
+    if not grid[grid.total_rows - 1][1].is_start() and not grid[grid.total_rows - 1][1].is_end():
+        grid[grid.total_rows - 1][1].reset()
+
+    if not grid[grid.total_rows - 1][grid.total_columns - 2].is_start() and not grid[grid.total_rows - 1][grid.total_columns - 2].is_end():
+        grid[grid.total_rows - 1][grid.total_columns - 2].reset()
+   
+    grid.draw_over_grid_lines()
 
     
 

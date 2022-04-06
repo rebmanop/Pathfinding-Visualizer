@@ -103,10 +103,16 @@ class Grid:
         pygame.draw.line(self.win, GREY, ((0, self.y + self.height + 2)), (self.win.get_width(), self.y + self.height + 2), width=5)
 
 
-    def make_all_cells_wall(self) -> None:
-        for row in self.raw_grid:
-            for cell in row:
-                cell.make_wall()
+    def make_all_cells_wall(self, start_end_except=False) -> None:
+        if start_end_except:
+            for row in self.raw_grid:
+                for cell in row:
+                    if not cell.is_start() and not cell.is_end():
+                        cell.make_wall()
+        else:
+            for row in self.raw_grid:
+                for cell in row:
+                     cell.make_wall()
 
 
     def mouse_on_the_grid(self) -> bool:
