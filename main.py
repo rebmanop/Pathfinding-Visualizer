@@ -77,7 +77,7 @@ def main() -> None:
     
     draw_lambda = lambda: draw(WIN, grid, UI_MANAGER, time_delta, legend_cells)
 
-    animation_speed = FPS
+    animation_speed = 250
 
 
     #gui elements initialization
@@ -146,6 +146,28 @@ def main() -> None:
         LegendCell(WIN, grid.x + 600, HEIGHT - 35, cell.PATH_COLOR, GREY, grid),
         LegendCell(WIN, grid.x + 800, HEIGHT - 35, cell.WALL_COLOR, GREY, grid)]
 
+
+    speed_lable = pygame_gui.elements.UILabel(
+                        relative_rect=pygame.Rect((grid.x + 1000, HEIGHT - 37), (50, grid.gap + 5)),
+                        text="Speed:",
+                        manager=UI_MANAGER,
+                        object_id=ObjectID(class_id="@legend_cell_lables"))
+    
+
+    speed_slider = pygame_gui.elements.UIHorizontalSlider(
+                    start_value=animation_speed,
+                    value_range=(animation_speed - animation_speed / 2, animation_speed + animation_speed / 2),
+                    relative_rect=pygame.Rect((grid.x + 1050, HEIGHT - 37 ), (200, grid.gap + 5)), 
+                    manager=UI_MANAGER)
+
+    
+    speed_value_lable = pygame_gui.elements.UILabel(
+                        relative_rect=pygame.Rect((grid.x + 1250, HEIGHT - 37), (35, grid.gap + 5)),
+                        text="x",
+                        manager=UI_MANAGER,
+                        object_id=ObjectID(class_id="@legend_cell_lables"))
+    speed_value_lable.set_text(f"{round(speed_slider.current_percentage * 100)}%")
+    
 
     start = grid[grid.total_rows // 2][grid.total_columns // 2 - 2]
     end = grid[grid.total_rows // 2][grid.total_columns // 2 + 2]
@@ -291,6 +313,13 @@ def main() -> None:
                     draw_lambda()
                     generate_current_maze(maze_menu, WIN, grid, ANIMATION, animation_speed)
                     algo_visualized = False
+
+
+            if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+                if event.ui_element == speed_slider:
+                    animation_speed = speed_slider.current_value
+                    speed_value_lable.set_text(f"{round(speed_slider.current_percentage * 100)}%")
+                    
 
     pygame.quit()
 
