@@ -3,17 +3,18 @@ import pygame
 
 
 PATH_COLOR = (255, 254, 106) # yellow
-VISITED_COLOR = (64, 227, 206) # green
 OPEN_COLOR = (197, 114, 255)# purple
 WALL_COLOR = (30, 30, 30) # black
 UNVISITED_COLOR = (255, 255, 255) # white
+VISITED_COLOR_1 = (64, 227, 206)
+VISITED_COLOR_2 = (64, 206, 227)
 GREY = (130, 127, 125)
-  
+
 
 class Cell:
 	POINT_A_IMG = None
 	POINT_B_IMG = None
-
+	visited_color = VISITED_COLOR_1
 
 	def __init__(self, row, col, width, grid_size, grid_position):
 		self.row = row
@@ -32,7 +33,7 @@ class Cell:
 
 
 	def is_visited(self):
-		return self.color == VISITED_COLOR
+		return self.color == Cell.visited_color
 
 	def is_open(self):	
 		return self.color == OPEN_COLOR
@@ -52,6 +53,9 @@ class Cell:
 	def is_unvisited(self):
 		return self.color == UNVISITED_COLOR
 
+	def is_parcel(self):
+		return self.color == Cell.PARCEL_POINT_IMG
+
 
 	def reset(self):
 		self.color = UNVISITED_COLOR
@@ -60,7 +64,7 @@ class Cell:
 		self.color = self.POINT_A_IMG
 
 	def visit(self):
-		self.color = VISITED_COLOR
+		self.color = Cell.visited_color
 
 	def make_open(self):
 		self.color = OPEN_COLOR
@@ -74,9 +78,12 @@ class Cell:
 	def make_path(self):
 		self.color = PATH_COLOR
 
+	def make_parcel(self):
+		self.color = Cell.PARCEL_POINT_IMG
+
 
 	def draw(self, win, animation=False):
-		if self.is_start() or self.is_end():
+		if self.is_start() or self.is_end() or self.is_parcel():
 			pygame.draw.rect(win, UNVISITED_COLOR, (self.x, self.y, self.width, self.width))
 			win.blit(self.color, (self.x, self.y))	
 		else:
@@ -131,6 +138,7 @@ class Cell:
 	def scale_cell_imgs(width, height)-> None:
 		Cell.POINT_A_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-a.png')).convert_alpha(), (width, height))
 		Cell.POINT_B_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-b.png')).convert_alpha(), (width, height))
+		Cell.PARCEL_POINT_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'parcel.png')).convert_alpha(), (width, height))
 
 	
 

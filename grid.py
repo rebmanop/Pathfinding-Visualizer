@@ -81,13 +81,13 @@ class Grid:
         if start_end_except == True and barrier_except == True:       
             for row in self.raw_grid:
                 for  cell in row:
-                    if not cell.is_start() and not cell.is_end() and not cell.is_wall(): 
+                    if not cell.is_start() and not cell.is_end() and not cell.is_parcel() and not cell.is_wall(): 
                         cell.reset()
 
         elif start_end_except == True:
             for row in self.raw_grid:
                 for  cell in row:
-                    if not cell.is_start() and not cell.is_end(): 
+                    if not cell.is_start() and not cell.is_end() and not cell.is_parcel(): 
                         cell.reset()
 
         else:
@@ -107,7 +107,7 @@ class Grid:
         if start_end_except:
             for row in self.raw_grid:
                 for cell in row:
-                    if not cell.is_start() and not cell.is_end():
+                    if not cell.is_start() and not cell.is_end() and not cell.is_parcel():
                         cell.make_wall()
         else:
             for row in self.raw_grid:
