@@ -1,8 +1,10 @@
 import pygame
-from strenum import StrEnum
 
 
 def aborted() -> bool:
+
+    """Checks if function has been aborted"""
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -13,9 +15,8 @@ def aborted() -> bool:
 
 
 class Heuristic:
-    """
-    A class with basic heuristics
-    """
+
+    """Class with basic heuristics"""
 
     @staticmethod
     def octil(p1, p2):

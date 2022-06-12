@@ -6,14 +6,15 @@ PATH_COLOR = (255, 254, 106) # yellow
 OPEN_COLOR = (197, 114, 255)# purple
 WALL_COLOR = (30, 30, 30) # black
 UNVISITED_COLOR = (255, 255, 255) # white
-VISITED_COLOR_1 = (64, 227, 206)
-VISITED_COLOR_2 = (64, 206, 227)
+VISITED_COLOR_2 = (64, 227, 206)
+VISITED_COLOR_1 = (64, 206, 227)
 GREY = (130, 127, 125)
 
 
 class Cell:
-	POINT_A_IMG = None
-	POINT_B_IMG = None
+	point_a_img = None
+	point_b_img = None
+	point_parcel_img = None
 	visited_color = VISITED_COLOR_1
 
 	def __init__(self, row, col, width, grid_size, grid_position):
@@ -42,10 +43,10 @@ class Cell:
 		return self.color == WALL_COLOR
 
 	def is_start(self):
-		return self.color == Cell.POINT_A_IMG
+		return self.color == Cell.point_a_img
 
 	def is_end(self):
-		return self.color == Cell.POINT_B_IMG
+		return self.color == Cell.point_b_img
 	
 	def is_path(self):
 		return self.color == PATH_COLOR
@@ -54,14 +55,14 @@ class Cell:
 		return self.color == UNVISITED_COLOR
 
 	def is_parcel(self):
-		return self.color == Cell.PARCEL_POINT_IMG
+		return self.color == Cell.point_parcel_img
 
 
 	def reset(self):
 		self.color = UNVISITED_COLOR
 
 	def make_start(self):
-		self.color = self.POINT_A_IMG
+		self.color = Cell.point_a_img
 
 	def visit(self):
 		self.color = Cell.visited_color
@@ -73,16 +74,20 @@ class Cell:
 		self.color = WALL_COLOR
 
 	def make_end(self):
-		self.color = self.POINT_B_IMG	
+		self.color = Cell.point_b_img	
 
 	def make_path(self):
 		self.color = PATH_COLOR
 
 	def make_parcel(self):
-		self.color = Cell.PARCEL_POINT_IMG
+		self.color = Cell.point_parcel_img
 
 
 	def draw(self, win, animation=False):
+
+		"""Draws individual cell to the screen, 
+			also draws it's borders if animation is running"""
+
 		if self.is_start() or self.is_end() or self.is_parcel():
 			pygame.draw.rect(win, UNVISITED_COLOR, (self.x, self.y, self.width, self.width))
 			win.blit(self.color, (self.x, self.y))	
@@ -98,6 +103,9 @@ class Cell:
 
 
 	def update_neighbors(self, grid):
+		
+		"""Updates list of neighbors for this cell"""
+		
 		self.neighbors = []
 		if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_wall(): #down
 			self.neighbors.append(grid[self.row + 1][self.col])
@@ -113,6 +121,9 @@ class Cell:
 
 
 	def update_neighbors_by_direction(self, grid):
+
+		"""Updates dictionary of neighbors for this cell (key is neighbor direction)"""
+
 		self.neighbor_by_direction = {}
 		if self.row < self.total_rows - 1 : 
 			self.neighbor_by_direction["down"] = grid[self.row + 1][self.col]
@@ -136,9 +147,12 @@ class Cell:
 	
 	@staticmethod
 	def scale_cell_imgs(width, height)-> None:
-		Cell.POINT_A_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-a.png')).convert_alpha(), (width, height))
-		Cell.POINT_B_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'letter-b.png')).convert_alpha(), (width, height))
-		Cell.PARCEL_POINT_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'parcel.png')).convert_alpha(), (width, height))
+		
+		"""Scales cell images based on window dimensions"""
+
+		Cell.point_a_img = pygame.transform.scale(pygame.image.load(os.path.join('assets\imgs', 'letter-a.png')).convert_alpha(), (width, height))
+		Cell.point_b_img = pygame.transform.scale(pygame.image.load(os.path.join('assets\imgs', 'letter-b.png')).convert_alpha(), (width, height))
+		Cell.point_parcel_img = pygame.transform.scale(pygame.image.load(os.path.join('assets\imgs', 'parcel.png')).convert_alpha(), (width, height))
 
 	
 

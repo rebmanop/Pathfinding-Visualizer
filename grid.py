@@ -19,6 +19,9 @@ class Grid:
 
 
     def init_cells(self):
+
+        """Populates grid with cell objects"""
+
         raw_grid = []
 
         for i in range(self.total_rows):
@@ -30,19 +33,20 @@ class Grid:
         
 
     def draw_grid_lines(self) -> None:
+
+        """Draws horizontal and vertical grid lines"""
+
         for i in range(self.total_rows + 1):
             pygame.draw.line(self.win, self.line_color, (self.x, self.y + i * self.gap), (self.x + self.width, self.y + i * self.gap))
             for j in range(self.total_columns + 1):
                 pygame.draw.line(self.win, self.line_color, (self.x + j * self.gap, self.y), (self.x + j * self.gap, self.y + self.height))
 
  
-
-
-
     def update_neighbors_for_every_cell(self) -> None:
         for row in self.raw_grid:
             for cell in row:
                 cell.update_neighbors(self.raw_grid)
+
 
     def update_neighbors_by_direction_for_every_cell(self) -> None:
         for row in self.raw_grid:
@@ -51,12 +55,20 @@ class Grid:
 
 
     def draw_under_grid_lines(self) -> None:
+        
+        """Method meant to be called before drawing grid lines 
+            so cells would look divided by the lines"""
+
         for row in self.raw_grid:
             for cell in row:
                 if not cell.is_wall():
                     cell.draw(self.win)
 
     def draw_over_grid_lines(self) -> None:
+
+        """Method meant to be called after drawing grid lines 
+            so cells would look like they are connected"""
+
         for row in self.raw_grid:
             for cell in row:
                 if cell.is_wall(): 
@@ -64,10 +76,16 @@ class Grid:
 
 
     def get_cell(self, row: int, col: int) -> Cell:
+
+        """Returns cell object based on row and column"""
+
         return self.raw_grid[row][col]
     
 
-    def get_row_col_of_clicked_cell(self, mpos) -> tuple:
+    def get_rc_of_under_mouse_cell(self, mpos) -> tuple:
+        
+        """Returns row and column of under the mouse cell based on mouse position"""
+        
         x, y = mpos
 
         row =  (y - self.y) // self.gap
@@ -77,7 +95,9 @@ class Grid:
     
     
     def clear(self, start_end_except = False, barrier_except = False) -> None:
-        """clears the grid with an optional exclusion"""
+        
+        """Clears the grid with an optional cell type exception"""
+        
         if start_end_except == True and barrier_except == True:       
             for row in self.raw_grid:
                 for  cell in row:
@@ -104,6 +124,9 @@ class Grid:
 
 
     def make_all_cells_wall(self, start_end_except=False) -> None:
+
+        """Recoloring all cells with wall color"""
+
         if start_end_except:
             for row in self.raw_grid:
                 for cell in row:
@@ -116,6 +139,9 @@ class Grid:
 
 
     def mouse_on_the_grid(self) -> bool:
+
+        """Checks if mouse on the grid"""
+        
         mpos = pygame.mouse.get_pos()
         if (mpos[0] > self.x and mpos[0] < (self.x + self.width) 
         and mpos[1] > self.y and mpos[1] < (self.y + self.height)):

@@ -10,6 +10,9 @@ GUI_ELEMENT_OFFSET = 20
 
 
 class GUI:
+
+    """GUI handler class"""
+
     def __init__(self, win, ui_manager, grid, algorithms, mazes, width, height, animation_speed):
         
         self.algo_menu = pygame_gui.elements.UIDropDownMenu(
@@ -70,46 +73,47 @@ class GUI:
         )
 
         self.unvisited_cell_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + grid.gap, height - 35), (130, grid.gap)),
-            text="-unvisited cell",
+            relative_rect=pygame.Rect((grid.x + grid.gap, height - 30), (90, grid.gap)),
+            text="-unvisited",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),
         )
 
         self.visited_cell_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + 200 + grid.gap, height - 35), (115, grid.gap)),
-            text="-visited cell",
+            relative_rect=pygame.Rect((grid.x + 800 + grid.gap, height - 30), (123, grid.gap)),
+            text="-visited",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),
         )
 
         self.open_cell_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + 400 + grid.gap, height - 35), (90, grid.gap)),
-            text="-open cell",
+            relative_rect=pygame.Rect((grid.x + 400 + grid.gap, height - 30), (50, grid.gap)),
+            text="-open",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),
         )
 
         self.path_cell_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + 600 + grid.gap, height - 35), (90, grid.gap)),
-            text="-path cell",
+            relative_rect=pygame.Rect((grid.x + 600 + grid.gap, height - 30), (50, grid.gap)),
+            text="-path",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),
         )
 
         self.wall_cell_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + 800 + grid.gap, height - 35), (90, grid.gap)),
-            text="-wall cell",
+            relative_rect=pygame.Rect((grid.x + 200 + grid.gap, height - 30), (50, grid.gap)),
+            text="-wall",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),
         )
 
         self.legend_cells = [
-            LegendCell(win, grid.x, height - 35, cell.UNVISITED_COLOR, GREY, grid),
-            LegendCell(win, grid.x + 200, height - 35, cell.VISITED_COLOR_1, GREY, grid),
-            LegendCell(win, grid.x + 400, height - 35, cell.OPEN_COLOR, GREY, grid),
-            LegendCell(win, grid.x + 600, height - 35, cell.PATH_COLOR, GREY, grid),
-            LegendCell(win, grid.x + 800, height - 35, cell.WALL_COLOR, GREY, grid),
+            LegendCell(win, grid.x, height - 30, cell.UNVISITED_COLOR, GREY, grid),
+            LegendCell(win, grid.x + 200, height - 30, cell.WALL_COLOR, GREY, grid),
+            LegendCell(win, grid.x + 400, height - 30, cell.OPEN_COLOR, GREY, grid),
+            LegendCell(win, grid.x + 600, height - 30, cell.PATH_COLOR, GREY, grid),
+            LegendCell(win, grid.x + 800, height - 30, cell.VISITED_COLOR_1, GREY, grid),
+            LegendCell(win, grid.x + 825, height - 30, cell.VISITED_COLOR_2, GREY, grid),
         ]
 
         self.clear_button = pygame_gui.elements.UIButton(
@@ -132,7 +136,7 @@ class GUI:
             manager=ui_manager,
         )
         self.speed_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + 1000, height - 37), (50, grid.gap + 5)),
+            relative_rect=pygame.Rect((grid.x + 1000, height - 32), (50, grid.gap + 5)),
             text="Speed:",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),
@@ -141,12 +145,12 @@ class GUI:
         self.speed_slider = pygame_gui.elements.UIHorizontalSlider(
             start_value=animation_speed,
             value_range=(animation_speed - animation_speed / 2, animation_speed + animation_speed / 2,),
-            relative_rect=pygame.Rect((grid.x + 1050, height - 37), (200, grid.gap + 5)),
+            relative_rect=pygame.Rect((grid.x + 1050, height - 32), (200, grid.gap + 5)),
             manager=ui_manager,
         )
 
         self.speed_value_lable = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((grid.x + 1250, height - 37), (35, grid.gap + 5)),
+            relative_rect=pygame.Rect((grid.x + 1250, height - 32), (35, grid.gap + 5)),
             text="x",
             manager=ui_manager,
             object_id=ObjectID(object_id=None, class_id="@legend_cell_lables"),

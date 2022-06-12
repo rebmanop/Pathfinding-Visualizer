@@ -1,4 +1,3 @@
-from typing import Type
 import pygame
 from cell import Cell
 from grid import Grid
@@ -9,6 +8,9 @@ PATH_ANIMATION_SPEED = 100
 
 
 def reconstruct_path(came_from: dict, current: Cell) -> list[Cell]:
+    
+    """Returns (ready for animation) list of path cells"""
+    
     path = []
     while current in came_from:
         current = came_from[current]
@@ -25,6 +27,9 @@ def reconstruct_path(came_from: dict, current: Cell) -> list[Cell]:
 
 
 def reconstruct_path_bbfs(came_from: dict, current: Cell) -> list[Cell]:
+    
+    """Returns (ready for animation) list of path cells for bbfs alorithm"""
+    
     path = [current]
     while current in came_from:
         current = came_from[current]
@@ -36,6 +41,9 @@ def reconstruct_path_bbfs(came_from: dict, current: Cell) -> list[Cell]:
 
 
 def can_redraw(cell: Cell) -> bool:
+
+    """Checks if cell isn't important and can be redrawn"""
+
     if not cell.is_path() and not cell.is_end() and not cell.is_start() and not cell.is_parcel():
         return True
     else:
@@ -43,8 +51,13 @@ def can_redraw(cell: Cell) -> bool:
 
 
 def animate_path(
-    win: pygame.surface.Surface, path: list[Cell], grid: Grid, animation: bool
+    win: pygame.surface.Surface, 
+    path: list[Cell], grid: Grid, 
+    animation: bool
 ) -> None:
+
+    """Animates path with specified speed"""
+
     reset_opened_cells(grid, win, animation)
     clock = pygame.time.Clock()
     for cell in path:
@@ -59,12 +72,17 @@ def animate_path(
 
 
 def reset_opened_cells(grid: Grid, win: pygame.surface.Surface, animation: bool):
+    
+    """Resets open cells that are left after the animation"""
+    
     for row in grid.raw_grid:
         for cell in row:
             if cell.is_open():
                 cell.reset()
                 cell.draw(win, animation)
 
+
+"""ALGORITHMS: """
 
 def astar(
     win: pygame.surface.Surface,
