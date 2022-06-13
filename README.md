@@ -26,8 +26,12 @@ The application is written in python using **pygame** mainly for educational pur
 All the lists will probably be extended at some point in the future.
 
 # Demo
-###### 
-![This is a gif](/assets/gifs/astar_animation.gif)
+###### Dijkstra's algorithm + recursive division maze
+![This is a gif](/assets/gifs/dijkstra_recdiv.gif)
+###### Bidirectional bfs + intermidiate point (parcel) 
+![This is a gif](/assets/gifs/bibfs_parcel.gif)
+###### A* algorithm + revisualization feature
+![This is a gif](/assets/gifs/astar_stair_revisualization.gif)
 
 # Dependencies
  - **pygame**
