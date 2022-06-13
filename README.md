@@ -1,4 +1,3 @@
-# Pathfinding-Visualizer
 ![This is an image](/assets/imgs/github_page_image.png)
 # Description
 The application is written in python using **pygame** mainly for educational purposes, to learn more about pathfinding and maze generation.   
