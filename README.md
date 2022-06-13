@@ -28,7 +28,7 @@ All the lists will probably be extended at some point in the future.
 
 # Demo
 ###### 
-![This is a gif](/imgs/gifs/astar_animation.gif)
+![This is a gif](/assets/gifs/astar_animation.gif)
 
 # Dependencies
  - **pygame**
