@@ -1,8 +1,8 @@
 # Pathfinding-Visualizer
 ![This is an image](/assets/imgs/github_page_image.png)
 # Description
-Visualization of this kind helps to understand a general idea behind every implemented algorithm.
-The application is written mainly for educational purposes, to learn more about pathfinding, maze generation and to challenge my software development skills.
+Visualization of this kind helps to understand the general idea behind every implemented algorithm.
+The application is written mainly for educational purposes: to learn more about pathfinding, maze generation, and to challenge my software development skills.
 
 
 #### Implemented pathfinding algorithms:
